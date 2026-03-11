@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>METAFORGE | Elite Digital Document Infrastructure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet"></noscript>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root { 
+            --primary: #9B5DE5; 
+            --primary-glow: rgba(155, 93, 229, 0.4);
+            --secondary: #120A1A; 
+            --dark: #0A050F; 
+            --accent: #00BBF9; 
+            --accent-glow: rgba(0, 187, 249, 0.3);
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(155, 93, 229, 0.2);
+            --bg-prestige: #FAF9FF; 
+            --text-light: #F5F5F5;
+            --text-dark: #120A1A;
+            --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="light"] {
+            --dark: var(--bg-prestige);
+            --secondary: #FFFFFF;
+            --glass: rgba(18, 10, 26, 0.04);
+            --border: rgba(18, 10, 26, 0.12);
+            --text-light: #120A1A;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior: smooth; }
+        
+        body { 
+            background: var(--dark); 
+            color: var(--text-light); 
+            font-family: 'Inter', sans-serif; 
+            overflow-x: hidden; 
+            transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s ease;
+            min-height: 100vh;
+        }
+
+        /* Engineered M Logo */
+        .logo-m {
+            width: 45px;
+            height: 45px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-m svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+        }
+
+        /* Ambient Background Canvas */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.9;
+        }
+
+        .ambient-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% -20%, var(--primary-glow), transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Navigation */
+        nav { 
+            padding: 20px 80px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(10, 5, 15, 0.85); 
+            backdrop-filter: blur(40px); 
+            position: fixed; 
+            top: 0; left: 0; right: 0; 
+            z-index: 3000; 
+            border-bottom: 1px solid var(--border); 
+        }
+
+        [data-theme="light"] nav { background: rgba(250, 249, 255, 0.85); }
+
+        .logo { 
+            font-family: 'Space Grotesk', sans-serif; 
+            font-size: 24px; 
+            font-weight: 700; 
+            letter-spacing: 2px; 
+            color: var(--primary); 
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 3001;
+        }
+        .logo span { color: var(--text-light); font-weight: 300; }
+
+        .nav-links { display: flex; gap: 40px; align-items: center; }
+        .nav-link { 
+            color: inherit; 
+            opacity: 0.6;
+            text-decoration: none; 
+            font-size: 13px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            transition: var(--transition); 
+            font-weight: 600;
+        }
+        .nav-link:hover { opacity: 1; color: var(--primary); }
+
+        .theme-toggle {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            width: 45px;
+            height: 45px;
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: var(--transition);
+            color: inherit;
+        }
+        .theme-toggle:hover { transform: translateY(-3px) scale(1.05); border-color: var(--primary); }
+
+        /* Hamburger Menu (Mobile) */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            z-index: 3001;
+            padding: 5px;
+        }
+        .hamburger span {
+            display: block;
+            width: 30px;
+            height: 3px;
+            background: var(--primary);
+            transition: 0.3s;
+            border-radius: 3px;
+        }
+        .hamburger.active span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+
+        /* Mobile Menu Overlay */
+        .mobile-menu {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 5, 15, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 2500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            transform: translateY(-100%);
+            transition: 0.4s ease-in-out;
+            opacity: 0;
+            pointer-events: none;
+        }
+        [data-theme="light"] .mobile-menu { background: rgba(250, 249, 255, 0.98); }
+        .mobile-menu.show { transform: translateY(0); opacity: 1; pointer-events: all; }
+        .mobile-menu .nav-link { font-size: 18px; opacity: 1; }
+
+        /* Hero Section */
+        .hero { 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 160px 80px 100px; 
+            text-align: center; 
+            position: relative;
+        }
+
+        h1 { 
+            font-family: 'Space Grotesk', sans-serif; 
+            font-size: clamp(45px, 9vw, 110px); 
+            line-height: 0.95; 
+            margin-bottom: 35px; 
+            letter-spacing: -5px; 
+            font-weight: 700;
+            background: linear-gradient(to bottom, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-sub { 
+            color: inherit;
+            opacity: 0.85; 
+            font-size: clamp(18px, 2vw, 22px); 
+            max-width: 850px; 
+            margin: 0 auto 60px; 
+            line-height: 1.5; 
+            font-weight: 400;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-btns { display: flex; gap: 25px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            padding: 18px 42px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--primary), var(--accent)); 
+            color: white; 
+            box-shadow: 0 15px 40px var(--primary-glow);
+        }
+        .btn-primary:hover { transform: translateY(-5px); box-shadow: 0 25px 50px var(--primary-glow); }
+
+        .btn-outline {
+            background: var(--glass);
+            color: inherit;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(15px);
+        }
+        .btn-outline:hover { background: rgba(255,255,255,0.08); border-color: var(--primary); transform: translateY(-5px); }
+
+        /* Partner Scrolling Wall */
+        .partners-section { padding: 100px 0; background: rgba(0,0,0,0.2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: hidden; }
+        .partners-track { display: flex; gap: 50px; width: max-content; animation: scroll 40s linear infinite; }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        
+        .partner-card {
+            background: var(--glass);
+            padding: 25px 45px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            min-width: 250px;
+            backdrop-filter: blur(10px);
+        }
+        .partner-brand { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--primary); text-transform: uppercase;}
+        .partner-count { font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* General Section Styling */
+        .section { padding: 140px 80px; position: relative; }
+        .section-header { text-align: center; margin-bottom: 80px; }
+        .section-tag { color: var(--primary); font-size: 13px; letter-spacing: 4px; font-weight: 700; text-transform: uppercase; margin-bottom: 25px; display: block; }
+        .section-title { font-family: 'Space Grotesk', sans-serif; font-size: clamp(32px, 5vw, 48px); letter-spacing: -2px; font-weight: 700; }
+
+        /* Demo Engine Container */
+        .demo-container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            display: grid; 
+            grid-template-columns: 500px 1fr; 
+            gap: 80px; 
+            align-items: start; 
+        }
+
+        .demo-controls {
+            background: var(--glass);
+            padding: 50px;
+            border-radius: 40px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(40px);
+        }
+
+        .demo-input-group { margin-bottom: 30px; }
+        .demo-input-group label { display: block; font-size: 11px; opacity: 0.7; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; font-weight: 700; }
+        
+        .demo-input { 
+            width: 100%; 
+            padding: 18px; 
+            background: rgba(0,0,0,0.4); 
+            border: 1px solid var(--border); 
+            border-radius: 16px; 
+            color: inherit; 
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+        [data-theme="light"] .demo-input { background: rgba(255,255,255,0.8); }
+        .demo-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 20px var(--primary-glow); }
+
+        /* Modern Template Grid for 35 Items */
+        .template-grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 12px; 
+            margin-top: 15px; 
+            max-height: 250px; 
+            overflow-y: auto; 
+            padding-right: 5px; 
+        }
+        .template-grid::-webkit-scrollbar { width: 6px; }
+        .template-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .template-grid::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        
+        .temp-opt { 
+            height: auto; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            border: 2px solid transparent; 
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+            background: transparent;
+            padding: 5px;
+        }
+        .temp-opt:hover { transform: translateY(-3px); }
+        .temp-opt.active { border-color: var(--primary); transform: scale(1.05); background: rgba(155, 93, 229, 0.1); box-shadow: 0 0 15px var(--primary-glow); }
+        
+        .template-preview-mini { height: 50px; background: white; border-radius: 5px; margin-bottom: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 7px; color: #333; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .template-name { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; color: var(--text-light); }
+
+        .demo-viewport {
+            height: 850px;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 50px 120px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* Request Form Card */
+        .request-card {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--glass);
+            padding: 70px;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(60px);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+        }
+
+        .request-info h3 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(28px, 4vw, 42px); margin-bottom: 25px; line-height: 1.1; }
+        .request-info p { opacity: 0.7; font-size: 18px; line-height: 1.7; margin-bottom: 40px; }
+        .request-form { display: flex; flex-direction: column; gap: 20px; }
+
+        /* Footer */
+        footer { 
+            padding: 120px 80px 60px; 
+            border-top: 1px solid var(--border); 
+            background: rgba(10, 5, 15, 0.95);
+            color: var(--text-light);
+        }
+        [data-theme="light"] footer {
+            background: #F0F0F0;
+            color: #120A1A;
+        }
+        .footer-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 60px;
+            margin-bottom: 100px;
+        }
+        .footer-brand { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; color: var(--primary); margin-bottom: 25px; }
+        .footer-col h4 { font-family: 'Space Grotesk', sans-serif; font-size: 13px; letter-spacing: 2px; margin-bottom: 30px; text-transform: uppercase; color: var(--primary); }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 18px; }
+        .footer-links a { text-decoration: none; color: inherit; opacity: 0.6; transition: 0.3s; font-size: 14px; }
+        .footer-links a:hover { opacity: 1; color: var(--primary); }
+
+        .footer-bottom { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding-top: 40px; 
+            border-top: 1px solid var(--border); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .footer-copy { font-size: 11px; opacity: 0.4; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* Mobile Optimization */
+        @media (max-width: 1100px) {
+            nav { padding: 15px 25px; }
+            .nav-links { display: none; } /* Hide desktop nav */
+            .hamburger { display: flex; } /* Show hamburger */
+            
+            .hero { padding: 140px 25px 80px; }
+            .section { padding: 100px 25px; }
+            .demo-container { grid-template-columns: 1fr; gap: 40px; }
+            .demo-controls { padding: 30px; border-radius: 30px; }
+            .request-card { padding: 40px 25px; border-radius: 30px; grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+            .footer-bottom { flex-direction: column; gap: 20px; text-align: center; }
+            
+            .template-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: clamp(40px, 12vw, 70px); letter-spacing: -2px; }
+            .hero-sub { font-size: 18px; margin-bottom: 40px; }
+            .hero-btns { flex-direction: column; width: 100%; }
+            .btn { width: 100%; justify-content: center; padding: 16px 30px; }
+            .section-title { font-size: 36px; }
+            .demo-viewport { height: 600px; border-radius: 20px; }
+            .footer-grid { grid-template-columns: 1fr; text-align: center; }
+            .footer-col h4::after { content: ""; display: block; width: 40px; height: 2px; background: var(--primary); margin: 10px auto 0; }
+            .request-form { grid-template-columns: 1fr; }
+            .request-form > div, .request-form > button { grid-column: span 1 !important; }
+            .template-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .logo { font-size: 20px; }
+            .logo-m { width: 35px; height: 35px; }
+            .section-tag { font-size: 11px; letter-spacing: 2px; }
+            .partner-card { min-width: 200px; padding: 20px; }
+            .template-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Cookie Popup */
+        .cookie-popup {
+            position: fixed; bottom: 20px; left: 20px; background: rgba(10, 5, 15, 0.95);
+            backdrop-filter: blur(20px); border: 1px solid var(--border); padding: 25px;
+            border-radius: 20px; z-index: 10000; max-width: 350px; display: none;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: slideUp 0.5s ease-out;
+        }
+        .cookie-popup.show { display: block; }
+        .cookie-content h3 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; margin-bottom: 10px; color: var(--primary); }
+        .cookie-content p { font-size: 12px; opacity: 0.7; margin-bottom: 20px; line-height: 1.5; }
+        .cookie-btns { display: flex; gap: 10px; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    </style>
+</head>
+<body data-theme="dark">
+    <canvas id="bgCanvas"></canvas>
+    <div class="ambient-overlay"></div>
+
+    <nav>
+        <a href="#" class="logo">
+            <div class="logo-m">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 80V20L50 50L80 20V80" stroke="url(#logoGrad)" stroke-width="8" stroke-linecap="square" stroke-linejoin="bevel"/>
+                    <path d="M20 20H35M80 20H65M20 80H35M80 80H65" stroke="url(#logoGrad)" stroke-width="4" stroke-linecap="square"/>
+                    <circle cx="20" cy="20" r="3" fill="#00BBF9"/>
+                    <circle cx="80" cy="20" r="3" fill="#00BBF9"/>
+                    <circle cx="50" cy="50" r="3" fill="#9B5DE5"/>
+                    <circle cx="20" cy="80" r="3" fill="#9B5DE5"/>
+                    <circle cx="80" cy="80" r="3" fill="#9B5DE5"/>
+                    <defs>
+                        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#9B5DE5" />
+                            <stop offset="50%" stop-color="#00BBF9" />
+                            <stop offset="100%" stop-color="#9B5DE5" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            METAFORGE<span>ENGINE</span>
+        </a>
+        
+        <div class="nav-links">
+            <a href="#prestige" class="nav-link">Prestige</a>
+            <a href="#social" class="nav-link">Partners</a>
+            <a href="#demo" class="nav-link">Interactive Demo</a>
+            <a href="#request" class="nav-link">Request Engine</a>
+            <button class="theme-toggle" id="themeToggle"></button>
+        </div>
+
+        <button class="hamburger" id="hamburgerBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#prestige" class="nav-link mobile-link">Prestige</a>
+        <a href="#social" class="nav-link mobile-link">Partners</a>
+        <a href="#demo" class="nav-link mobile-link">Interactive Demo</a>
+        <a href="#request" class="nav-link mobile-link">Request Engine</a>
+    </div>
+
+    <section class="hero">
+        <h1>ELEVATE YOUR <span>LEGACY</span></h1>
+        <p class="hero-sub">Welcome to sophisticated digital document automation powered by SkillForge Digital & Co. LTD. Engineered for elite brands who demand autonomy, ownership, and absolute authority over their financial infrastructure.</p>
+        
+        <div class="hero-btns">
+            <a href="#demo" class="btn btn-primary">
+                <span>EXPERIENCE THE ENGINE</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#request" class="btn btn-outline">REQUEST CUSTOM BUILD</a>
+        </div>
+    </section>
+
+    <section class="partners-section" id="social">
+        <div class="section-header" style="margin-bottom: 50px;">
+            <span class="section-tag">Global Activation Network</span>
+            <h2 class="section-title" style="font-size: 28px;">Active MetaForge Infrastructures</h2>
+        </div>
+        <div class="partners-track" id="partnersTrack">
+            <div style="color: #888; text-align: center; width: 100%;">Loading global partners...</div>
+        </div>
+    </section>
+
+    <section class="section" id="prestige">
+        <div class="section-header">
+            <span class="section-tag">Engineered for Excellence</span>
+            <h2 class="section-title">The Standard of Digital Prestige</h2>
+        </div>
+        <div class="demo-container" style="grid-template-columns: 1fr 1fr;">
+            <div style="background: var(--glass); padding: 50px; border-radius: 40px; border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center;">
+                <p style="opacity: 0.9; font-size: 20px; line-height: 1.6; margin-bottom: 40px;">In a world saturated with mediocrity, your brand's digital signature is its most powerful currency. The MetaForge Engine doesn't just generate documents; it architects a perception of absolute authority, reliability, and scale.</p>
+                <div style="display: flex; flex-direction: column; gap: 30px;">
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                        <div style="color: var(--primary); font-size: 24px; background: var(--glass); padding: 15px; border-radius: 15px;">🛡️</div>
+                        <div><strong style="font-size: 18px;">Elite Identity Architecture</strong><p style="opacity:0.6; font-size:15px; margin-top: 5px;">Forge a brand image that commands respect. Your engine is custom-calibrated to reflect your unique corporate DNA.</p></div>
+                    </div>
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                        <div style="color: var(--primary); font-size: 24px; background: var(--glass); padding: 15px; border-radius: 15px;">⚡</div>
+                        <div><strong style="font-size: 18px;">Frictionless Automation</strong><p style="opacity:0.6; font-size:15px; margin-top: 5px;">Eliminate operational drag. Generate pristine, audit-ready financial documents in milliseconds, not minutes.</p></div>
+                    </div>
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                        <div style="color: var(--primary); font-size: 24px; background: var(--glass); padding: 15px; border-radius: 15px;">💎</div>
+                        <div><strong style="font-size: 18px;">Digital Legacy</strong><p style="opacity:0.6; font-size:15px; margin-top: 5px;">Build a searchable, secure, and cloud-native history of your professional transactions. Your data, immortalized.</p></div>
+                    </div>
+                </div>
+            </div>
+            <div style="border-radius: 40px; overflow: hidden; border: 1px solid var(--border); position: relative;">
+                <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=1200" alt="Engineered Excellence" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(to top, var(--dark), transparent);"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="demo">
+        <div class="section-header">
+            <span class="section-tag">Interactive Benchmarking</span>
+            <h2 class="section-title">Test Your Digital Authority</h2>
+        </div>
+        <div class="demo-container">
+            <div class="demo-controls">
+                <div class="demo-input-group">
+                    <label>BRAND IDENTITY NAME</label>
+                    <input type="text" id="demoBrand" class="demo-input" placeholder="e.g. MetaForge Global" oninput="refreshDemo()">
+                </div>
+                <div class="demo-input-group">
+                    <label>REGISTRATION IDENTIFIER (RC/BN)</label>
+                    <input type="text" id="demoRC" class="demo-input" placeholder="e.g. RC 918273" oninput="refreshDemo()">
+                </div>
+                <div class="demo-input-group">
+                    <label>ADMINISTRATOR EMAIL</label>
+                    <input type="email" id="demoEmail" class="demo-input" placeholder="admin@brand.com" oninput="refreshDemo()">
+                </div>
+                <div class="demo-input-group">
+                    <label>PROFESSIONAL CONTACT</label>
+                    <input type="text" id="demoPhone" class="demo-input" placeholder="+234 814 081 3999" oninput="refreshDemo()">
+                </div>
+                <div class="demo-input-group">
+                    <label>KINETIC COLOR PROFILE</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div style="position: relative;">
+                            <input type="text" id="demoColorPrimary" class="demo-input" placeholder="#9B5DE5" oninput="updateColorPreview('primary'); refreshDemo()">
+                            <div id="previewPrimary" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 8px; background: var(--primary);"></div>
+                        </div>
+                        <div style="position: relative;">
+                            <input type="text" id="demoColorSecondary" class="demo-input" placeholder="#120A1A" oninput="updateColorPreview('secondary'); refreshDemo()">
+                            <div id="previewSecondary" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 8px; background: var(--secondary);"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-input-group">
+                    <label>SELECT INFRASTRUCTURE TEMPLATE</label>
+                    <div id="tempSelector" class="template-grid">
+                        </div>
+                </div>
+            </div>
+            
+            <div class="demo-viewport">
+                <iframe id="demoFrame" src="demo.html"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="request">
+        <div class="request-card" style="grid-template-columns: 1fr;">
+            <div class="request-info" style="text-align: center; max-width: 800px; margin: 0 auto;">
+                <span class="section-tag">Bespoke Activation</span>
+                <h3>Request Your Custom Engine.</h3>
+                <p>Begin your transition to elite digital document management. Fill in the full technical specifications below to initiate your build.</p>
+            </div>
+            <div class="request-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1000px; margin: 0 auto;">
+                <div class="demo-input-group" style="grid-column: span 2;">
+                    <label>LEGAL BUSINESS NAME</label>
+                    <input type="text" id="orderBrand" class="demo-input" placeholder="Full Registered Name">
+                </div>
+                <div class="demo-input-group">
+                    <label>TAGLINE / MOTTO</label>
+                    <input type="text" id="orderTagline" class="demo-input" placeholder="e.g. Excellence Redefined">
+                </div>
+                <div class="demo-input-group">
+                    <label>RC/BN NUMBER</label>
+                    <input type="text" id="orderRC" class="demo-input" placeholder="RC XXXXXX">
+                </div>
+                
+                <div class="demo-input-group">
+                    <label>ADMINISTRATOR EMAIL</label>
+                    <input type="email" id="orderEmail" class="demo-input" placeholder="admin@yourbrand.com">
+                </div>
+                <div class="demo-input-group">
+                    <label>WHATSAPP CONTACT</label>
+                    <input type="text" id="orderWhatsApp" class="demo-input" placeholder="+234 ...">
+                </div>
+                <div class="demo-input-group" style="grid-column: span 2;">
+                    <label>OFFICE ADDRESS</label>
+                    <input type="text" id="orderAddress" class="demo-input" placeholder="Full Business Address">
+                </div>
+
+                <div class="demo-input-group">
+                    <label>BANK NAME</label>
+                    <input type="text" id="orderBankName" class="demo-input" placeholder="e.g. GTBank">
+                </div>
+                <div class="demo-input-group">
+                    <label>ACCOUNT NUMBER</label>
+                    <input type="text" id="orderAccNumber" class="demo-input" placeholder="0123456789">
+                </div>
+                <div class="demo-input-group" style="grid-column: span 2;">
+                    <label>ACCOUNT NAME</label>
+                    <input type="text" id="orderAccName" class="demo-input" placeholder="Account Name (if different from Brand)">
+                </div>
+                <div class="demo-input-group">
+                    <label>CURRENCY SYMBOL</label>
+                    <input type="text" id="orderCurrency" class="demo-input" placeholder="₦, $, £">
+                </div>
+                <div class="demo-input-group">
+                    <label>VAT RATE (%)</label>
+                    <input type="number" id="orderVat" class="demo-input" placeholder="7.5">
+                </div>
+
+                <div class="demo-input-group">
+                    <label>BRAND PRIMARY COLOR</label>
+                    <input type="text" id="orderColor" class="demo-input" placeholder="#9B5DE5">
+                </div>
+                <div class="demo-input-group">
+                    <label>BRAND SECONDARY COLOR</label>
+                    <input type="text" id="orderColorSec" class="demo-input" placeholder="#120A1A">
+                </div>
+                <div class="demo-input-group" style="grid-column: span 2;">
+                    <label>DEFAULT TERMS & CONDITIONS</label>
+                    <textarea id="orderTerms" class="demo-input" rows="3" placeholder="e.g. No refunds after 3 days..."></textarea>
+                </div>
+                <div class="demo-input-group" style="grid-column: span 2;">
+                    <label>FOOTER NOTE</label>
+                    <input type="text" id="orderFooter" class="demo-input" placeholder="e.g. Thanks for your patronage!">
+                </div>
+
+                <div class="demo-input-group" style="grid-column: span 2;">
+                    <label>BUSINESS NATURE & STYLE PREFERENCES</label>
+                    <textarea id="orderDescription" class="demo-input" rows="3" placeholder="Describe your business (e.g., Real Estate, Tech) and any design preferences..."></textarea>
+                </div>
+                
+                <button class="btn btn-primary" style="grid-column: span 2; justify-content: center; margin-top: 20px;" onclick="submitRequest()">INITIALIZE BUILD REQUEST</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">METAFORGE<span>ENGINE</span></div>
+                <p class="footer-desc" style="font-size: 13px; opacity: 0.6; line-height: 1.5;">The global standard for prestigious digital document infrastructure. Powered by SkillForge Digital & Co. LTD.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Infrastructure</h4>
+                <ul class="footer-links">
+                    <li><a href="#prestige">Prestige</a></li>
+                    <li><a href="#social">Partners</a></li>
+                    <li><a href="#demo">Live Demo</a></li>
+                    <li><a href="#request">Build Request</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul class="footer-links">
+                    <li><a href="about.html">About MetaForge</a></li>
+                    <li><a href="faq.html">FAQ / Support</a></li>
+                    <li><a href="#contact">Contact Elite Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal & Compliance</h4>
+                <ul class="footer-links">
+                    <li><a href="legal/privacy.html">Privacy Policy</a></li>
+                    <li><a href="legal/terms.html">Terms of Service</a></li>
+                    <li><a href="legal/disclaimer.html">Disclaimer</a></li>
+                    <li><a href="legal/cookies.html">Cookie Authority</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copy">&copy; 2026 SkillForge Digital & Co. LTD. All Rights Reserved.</p>
+            <div style="display: flex; gap: 30px; opacity: 0.5; font-size: 11px;">
+                <span>ENCRYPTED INFRASTRUCTURE</span>
+                <span>SECURE PAYMENTS</span>
+            </div>
+        </div>
+    </footer>
+
+    <div class="cookie-popup" id="cookiePopup">
+        <div class="cookie-content">
+            <h3>🍪 Cookie Authority</h3>
+            <p>We use cookies to ensure the integrity of your digital infrastructure and enhance your experience.</p>
+            <div class="cookie-btns">
+                <button onclick="acceptCookies()" class="btn btn-primary" style="padding: 10px 20px; font-size: 12px;">ACCEPT</button>
+                <button onclick="rejectCookies()" class="btn btn-outline" style="padding: 10px 20px; font-size: 12px;">DECLINE</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAElgJBP-F322zoJ-T1qeE48s2ka0EcEvw", 
+            authDomain: "metaforge-6afdf.firebaseapp.com", 
+            projectId: "metaforge-6afdf", 
+            storageBucket: "metaforge-6afdf.firebasestorage.app", 
+            messagingSenderId: "261172077627", 
+            appId: "1:261172077627:web:cb3cec74be2dbcb1d6281e"
+        }; 
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- Hamburger Menu Logic ---
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        hamburgerBtn.addEventListener('click', () => {
+            hamburgerBtn.classList.toggle('active');
+            mobileMenu.classList.toggle('show');
+        });
+
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                hamburgerBtn.classList.remove('active');
+                mobileMenu.classList.remove('show');
+            });
+        });
+
+        // --- Live Firebase Partners ---
+        function listenToPartners() {
+            const track = document.getElementById('partnersTrack');
+            const q = query(collection(db, "short_urls"), orderBy("created_at", "desc"), limit(15));
+            
+            onSnapshot(q, (snapshot) => {
+                if(!snapshot.empty) {
+                    track.innerHTML = '';
+                    const docs = snapshot.docs.map(d => ({
+                        name: d.data().brandName || 'MetaForge Client',
+                        docs: Math.floor(Math.random() * 5000) + 1000 
+                    }));
+
+                    [...docs, ...docs].forEach(partner => {
+                        const card = document.createElement('div');
+                        card.className = 'partner-card';
+                        const letter = partner.name.charAt(0).toUpperCase();
+                        card.innerHTML = `
+                            <div style="width: 40px; height: 40px; background: rgba(155, 93, 229, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary); margin-bottom: 5px; border: 1px solid var(--border);">
+                                ${letter}
+                            </div>
+                            <div class="partner-brand">${partner.name.toUpperCase()}</div>
+                            <div class="partner-count">
+                                <span style="color: var(--accent); font-weight: 700;">${partner.docs.toLocaleString()}+</span> 
+                                DOCUMENTS GENERATED
+                            </div>
+                        `;
+                        track.appendChild(card);
+                    });
+                } else {
+                    track.innerHTML = `
+                        <div class="partner-card"><div class="partner-brand">APEX HOLDINGS</div><div class="partner-count">1,420+ DOCUMENTS</div></div>
+                        <div class="partner-card"><div class="partner-brand">NEXUS ENERGY</div><div class="partner-count">3,400+ DOCUMENTS</div></div>
+                        <div class="partner-card"><div class="partner-brand">CIPHER TECH</div><div class="partner-count">5,300+ DOCUMENTS</div></div>
+                    `;
+                }
+            });
+        }
+        listenToPartners();
+
+        // --- Demo Engine Logic (35 Templates) ---
+        const temps = [
+            'modern-tech', 'minimalist-pro', 'corporate-luxe', 'legal-professional', 'cyber-punk',
+            'retro-wave', 'neo-brutalist', 'startup-modern', 'royal-elegance', 'art-deco',
+            'fashion-boutique', 'hotel-resort', 'clean-air', 'swiss-design', 'japanese-minimal',
+            'compact-slip', 'midnight-special', 'garage-workshop', 'bold-stripe', 'fitness-gym',
+            'pharmacy-medical', 'bakery-sweet', 'nature-organic', 'salon-beauty', 'restaurant-diner',
+            'construction-industrial', 'education-academy', 'transport-logistics', 'real-estate', 'event-planning',
+            'curved-organic', 'geometric-slice', 'vintage-ticket', 'futuristic-glass', 'stamp-quality'
+        ];
+        
+        let activeTemp = 'modern-tech';
+        const selector = document.getElementById('tempSelector');
+        
+        const getPreviewStyle = (t) => {
+            if (t.includes('cyber')) return 'background: #000; border: 1px solid #00FF41;';
+            if (t.includes('luxe') || t.includes('royal') || t.includes('art')) return 'background: #FFFDF0; border: 1px double #D4AF37;';
+            if (t.includes('midnight') || t.includes('retro')) return 'background: linear-gradient(135deg, #1a1a2e, #16213e);';
+            if (t.includes('minimal') || t.includes('clean') || t.includes('slip')) return 'background: #fff; border: 1px dashed #ccc;';
+            if (t.includes('brutalist') || t.includes('slice')) return 'background: #fff; border: 2px solid #000; box-shadow: 2px 2px 0 #000;';
+            if (t.includes('glass')) return 'background: #121212; border: 1px solid var(--primary);';
+            if (t.includes('organic') || t.includes('nature')) return 'background: #f1f8e9; border-radius: 10px; border: 1px solid #558B2F;';
+            if (t.includes('sweet') || t.includes('salon')) return 'background: #fff5f5; border: 1px dashed #FF6B9D;';
+            return 'background: linear-gradient(135deg, #fff 50%, var(--primary) 50%);';
+        };
+
+        temps.forEach(t => {
+            const div = document.createElement('div');
+            div.className = `temp-opt ${t === activeTemp ? 'active' : ''}`;
+            div.title = t.replace(/-/g, ' ');
+            div.onclick = () => {
+                document.querySelectorAll('.temp-opt').forEach(el => el.classList.remove('active'));
+                div.classList.add('active');
+                activeTemp = t;
+                refreshDemo();
+            };
+            div.innerHTML = `
+                <div class="template-preview-mini" style="${getPreviewStyle(t)}"></div>
+                <div class="template-name">${t.replace(/-/g, ' ')}</div>
+            `;
+            selector.appendChild(div);
+        });
+
+        // Robust Unicode Base64 Encoding
+        function encodeData(obj) {
+            const jsonStr = JSON.stringify(obj);
+            const utf8Bytes = new TextEncoder().encode(jsonStr);
+            let binary = "";
+            for (let i = 0; i < utf8Bytes.byteLength; i++) { 
+                binary += String.fromCharCode(utf8Bytes[i]); 
+            }
+            return btoa(binary);
+        }
+
+        window.refreshDemo = function() {
+            const brand = document.getElementById('demoBrand').value || 'METAFORGE ELITE';
+            const rc = document.getElementById('demoRC').value || 'RC 000000';
+            const ph = document.getElementById('demoPhone').value || '+234 800 000 000';
+            const email = document.getElementById('demoEmail').value || 'demo@brand.com';
+            const pc = document.getElementById('demoColorPrimary').value || '#9B5DE5';
+            const sc = document.getElementById('demoColorSecondary').value || '#120A1A';
+            
+            const config = { 
+                bn: brand, ph: ph, rc: rc, em: email, tp: activeTemp, pc: pc, sc: sc,
+                dtp: "INVOICE",
+                locked: true,
+                ts: Date.now() 
+            };
+            
+            const encoded = encodeData(config);
+            document.getElementById('demoFrame').src = 'demo.html#' + encoded;
+        };
+
+        window.updateColorPreview = (type) => {
+            const val = document.getElementById('demoColor' + type.charAt(0).toUpperCase() + type.slice(1)).value;
+            document.getElementById('preview' + type.charAt(0).toUpperCase() + type.slice(1)).style.background = val;
+        };
+
+        window.submitRequest = async () => {
+            const brand = document.getElementById('orderBrand').value;
+            const email = document.getElementById('orderEmail').value;
+            const wa = document.getElementById('orderWhatsApp').value;
+            
+            const tagline = document.getElementById('orderTagline').value;
+            const rc = document.getElementById('orderRC').value;
+            const address = document.getElementById('orderAddress').value;
+            const bank = document.getElementById('orderBankName').value;
+            const accNum = document.getElementById('orderAccNumber').value;
+            const accName = document.getElementById('orderAccName').value;
+            const currency = document.getElementById('orderCurrency').value;
+            const vat = document.getElementById('orderVat').value;
+            const primary = document.getElementById('orderColor').value;
+            const secondary = document.getElementById('orderColorSec').value;
+            const terms = document.getElementById('orderTerms').value;
+            const footer = document.getElementById('orderFooter').value;
+            const desc = document.getElementById('orderDescription').value;
+
+            if(!brand || !email || !wa) return alert("Required fields missing: Brand Name, Email, and WhatsApp are mandatory.");
+            
+            try {
+                await addDoc(collection(db, "engine_requests"), { 
+                    brandName: brand, email, whatsApp: wa, tagline, rc, address,
+                    bankName: bank, accNumber: accNum, accName, currency, vatRate: vat,
+                    primaryColor: primary, secondaryColor: secondary, terms, footerNote: footer,
+                    description: desc, timestamp: serverTimestamp(), status: 'pending'
+                });
+                alert("Build initialization successful. Our team will contact you shortly.");
+                document.getElementById('orderBrand').value = '';
+                document.getElementById('orderEmail').value = '';
+                document.getElementById('orderWhatsApp').value = '';
+            } catch(e) { alert("Error: " + e.message); }
+        };
+
+        // Theme Toggle Logic
+        const themeBtn = document.getElementById('themeToggle');
+        themeBtn.textContent = '🌙';
+        themeBtn.onclick = () => {
+            const current = document.body.getAttribute('data-theme');
+            const target = current === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', target);
+            themeBtn.textContent = target === 'light' ? '☀️' : '🌙';
+        };
+
+        // --- FULL 7-DAY DYNAMIC BACKGROUND ENGINE RESTORED ---
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        const day = new Date().getDay(); 
+
+        let particles = [], engineParts = [], gridLines = [], matrixDrops = [], waves = [];
+
+        function getThemeColors() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            return {
+                primary: isDark ? '#9B5DE5' : '#7038ba',
+                accent: isDark ? '#00BBF9' : '#007bb5'
+            };
+        }
+
+        function initBG() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = []; engineParts = []; matrixDrops = []; waves = [];
+            
+            if (day === 0) { 
+                for(let i=0; i<80; i++) particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, r: Math.random() * 2 + 1, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5 });
+            } else if (day === 1) { 
+                for(let i=0; i<15; i++) engineParts.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, w: Math.random() * 200 + 50, h: 2, speed: Math.random() * 2 + 1, dir: Math.random() > 0.5 ? 1 : -1 });
+            } else if (day === 2) { 
+                for(let i=0; i<8; i++) engineParts.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, r: Math.random() * 50 + 30, angle: Math.random() * Math.PI * 2, speed: (Math.random() - 0.5) * 0.02 });
+            } else if (day === 3) { 
+                for(let i=0; i<60; i++) particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.8, vy: (Math.random() - 0.5) * 0.8 });
+            } else if (day === 4) { 
+                const columns = Math.floor(canvas.width / 20);
+                for(let i=0; i<columns; i++) matrixDrops[i] = Math.random() * canvas.height;
+            } else if (day === 5) { 
+                for(let i=0; i<5; i++) waves.push({ y: canvas.height/2 + (Math.random()-0.5)*200, freq: 0.01 + Math.random()*0.02, amp: 50 + Math.random()*100, phase: Math.random()*Math.PI*2 });
+            }
+        }
+
+        function drawBG() {
+            const colors = getThemeColors();
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            
+            if (day === 0) { 
+                particles.forEach(p => {
+                    p.x += p.vx; p.y += p.vy;
+                    if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fillStyle = colors.primary; ctx.fill();
+                    particles.forEach(p2 => {
+                        let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                        if(dist < 120) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.strokeStyle = `rgba(155, 93, 229, ${0.1 * (1 - dist/120)})`; ctx.stroke(); }
+                    });
+                });
+            } else if (day === 1) { 
+                engineParts.forEach(p => {
+                    p.x += p.speed * p.dir;
+                    if(p.x > canvas.width + p.w) p.x = -p.w;
+                    if(p.x < -p.w) p.x = canvas.width + p.w;
+                    ctx.fillStyle = `rgba(155, 93, 229, 0.2)`; ctx.fillRect(p.x, p.y, p.w, p.h);
+                    ctx.fillStyle = colors.accent; ctx.fillRect(p.dir > 0 ? p.x + p.w : p.x, p.y - 1, 4, 4);
+                });
+            } else if (day === 2) { 
+                engineParts.forEach(p => {
+                    p.angle += p.speed;
+                    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) { ctx.rotate(Math.PI / 3); ctx.rect(-5, -p.r, 10, 10); }
+                    ctx.strokeStyle = `rgba(155, 93, 229, 0.3)`; ctx.stroke();
+                    ctx.beginPath(); ctx.arc(0, 0, p.r - 5, 0, Math.PI * 2); ctx.strokeStyle = `rgba(0, 187, 249, 0.3)`; ctx.stroke();
+                    ctx.restore();
+                });
+            } else if (day === 3) { 
+                particles.forEach(p => {
+                    p.x += p.vx; p.y += p.vy;
+                    if(p.x < 0) p.x = canvas.width; if(p.x > canvas.width) p.x = 0;
+                    if(p.y < 0) p.y = canvas.height; if(p.y > canvas.height) p.y = 0;
+                });
+                for(let i=0; i<particles.length; i++) {
+                    for(let j=i+1; j<particles.length; j++) {
+                        let dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
+                        if(dist < 150) { ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.strokeStyle = `rgba(155, 93, 229, ${0.15 * (1 - dist/150)})`; ctx.stroke(); }
+                    }
+                }
+            } else if (day === 4) { 
+                ctx.fillStyle = colors.primary; ctx.font = '12px monospace';
+                for(let i=0; i<matrixDrops.length; i++) {
+                    const text = String.fromCharCode(0x30A0 + Math.random() * 96);
+                    ctx.globalAlpha = 0.3; ctx.fillText(text, i * 20, matrixDrops[i] * 20); ctx.globalAlpha = 1.0;
+                    if(matrixDrops[i] * 20 > canvas.height && Math.random() > 0.975) matrixDrops[i] = 0;
+                    matrixDrops[i]++;
+                }
+            } else if (day === 5) { 
+                waves.forEach(w => {
+                    w.phase += w.freq; ctx.beginPath();
+                    for(let x=0; x<canvas.width; x+=10) ctx.lineTo(x, w.y + Math.sin(x*0.01 + w.phase) * w.amp);
+                    ctx.strokeStyle = `rgba(0, 187, 249, 0.2)`; ctx.stroke();
+                });
+            } else if (day === 6) { 
+                let offset = (Date.now() % 1000) / 1000 * 50;
+                ctx.beginPath();
+                for(let i=0; i<canvas.width; i+=100) { ctx.moveTo(canvas.width/2, canvas.height/2); ctx.lineTo(i + (i-canvas.width/2)*2, canvas.height); }
+                ctx.strokeStyle = `rgba(155, 93, 229, 0.2)`; ctx.stroke();
+                for(let y=canvas.height/2; y<canvas.height; y+=50) { ctx.beginPath(); ctx.moveTo(0, y + offset); ctx.lineTo(canvas.width, y + offset); ctx.stroke(); }
+            }
+            requestAnimationFrame(drawBG);
+        }
+
+        window.addEventListener('resize', initBG);
+        initBG(); drawBG();
+
+        // Initial Demo Load
+        setTimeout(refreshDemo, 500);
+    </script>
+
+    <script>
+        function checkCookies() {
+            if (!localStorage.getItem('metaforge_cookies')) {
+                document.getElementById('cookiePopup').classList.add('show');
+            }
+        }
+        function acceptCookies() {
+            localStorage.setItem('metaforge_cookies', 'accepted');
+            document.getElementById('cookiePopup').classList.remove('show');
+        }
+        function rejectCookies() {
+            localStorage.setItem('metaforge_cookies', 'rejected');
+            document.getElementById('cookiePopup').classList.remove('show');
+        }
+        window.addEventListener('load', checkCookies);
+    </script>
+</body>
+</html>
