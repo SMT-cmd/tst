@@ -266,7 +266,7 @@
             min-width: 250px;
             backdrop-filter: blur(10px);
         }
-        .partner-brand { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--primary); text-transform: uppercase;}
+        .partner-brand { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
         .partner-count { font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 2px; }
 
         /* General Section Styling */
@@ -310,7 +310,7 @@
         [data-theme="light"] .demo-input { background: rgba(255,255,255,0.8); }
         .demo-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 20px var(--primary-glow); }
 
-        /* Modern Template Grid for 35 Items */
+        /* Template Grid for 35 Templates */
         .template-grid { 
             display: grid; 
             grid-template-columns: repeat(5, 1fr); 
@@ -600,10 +600,13 @@
                     </div>
                 </div>
                 <div class="demo-input-group">
-                    <label>SELECT INFRASTRUCTURE TEMPLATE</label>
+                    <label>SELECT INFRASTRUCTURE TEMPLATE (35 AVAILABLE)</label>
                     <div id="tempSelector" class="template-grid">
                         </div>
                 </div>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 25px; justify-content: center;" onclick="document.getElementById('demoFrame').contentWindow.print()">
+                    PRINT BRANDED PREVIEW
+                </button>
             </div>
             
             <div class="demo-viewport">
@@ -712,7 +715,7 @@
             <div class="footer-col">
                 <h4>Company</h4>
                 <ul class="footer-links">
-                    <li><a href="about.html">About MetaForge</a></li>
+                    <li><a href="about/index.html">About MetaForge</a></li>
                     <li><a href="faq.html">FAQ / Support</a></li>
                     <li><a href="#contact">Contact Elite Support</a></li>
                 </ul>
@@ -1051,7 +1054,6 @@
         window.addEventListener('resize', initBG);
         initBG(); drawBG();
 
-        // Initial Demo Load
         setTimeout(refreshDemo, 500);
     </script>
 
