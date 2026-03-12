@@ -11,11 +11,11 @@
     <link rel="manifest" href="manifest.json">
     <style>
         :root { 
-            --primary: #9B5DE5; 
+            --primary: #9B5DE5; /* Prestige Purple */
             --primary-glow: rgba(155, 93, 229, 0.4);
-            --secondary: #120A1A; 
+            --secondary: #120A1A; /* Deep Elite Black */
             --dark: #0A050F; 
-            --accent: #00BBF9; 
+            --accent: #00BBF9; /* Kinetic Blue */
             --accent-glow: rgba(0, 187, 249, 0.3);
             --glass: rgba(255, 255, 255, 0.03);
             --border: rgba(155, 93, 229, 0.2);
@@ -104,7 +104,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            z-index: 3001;
+            z-index: 3001; /* Keep above mobile menu */
         }
         .logo span { color: var(--text-light); font-weight: 300; }
 
@@ -137,46 +137,14 @@
         }
         .theme-toggle:hover { transform: translateY(-3px) scale(1.05); border-color: var(--primary); }
 
-        /* Hamburger Menu (Mobile) */
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            gap: 6px;
-            cursor: pointer;
-            background: transparent;
-            border: none;
-            z-index: 3001;
-            padding: 5px;
-        }
-        .hamburger span {
-            display: block;
-            width: 30px;
-            height: 3px;
-            background: var(--primary);
-            transition: 0.3s;
-            border-radius: 3px;
-        }
+        /* Mobile Navigation & Hamburger */
+        .hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; background: transparent; border: none; z-index: 3001; }
+        .hamburger span { width: 30px; height: 3px; background: var(--primary); transition: 0.3s; border-radius: 3px; }
         .hamburger.active span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
         .hamburger.active span:nth-child(2) { opacity: 0; }
         .hamburger.active span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 
-        /* Mobile Menu Overlay */
-        .mobile-menu {
-            position: fixed;
-            inset: 0;
-            background: rgba(10, 5, 15, 0.98);
-            backdrop-filter: blur(20px);
-            z-index: 2500;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 30px;
-            transform: translateY(-100%);
-            transition: 0.4s ease-in-out;
-            opacity: 0;
-            pointer-events: none;
-        }
+        .mobile-menu { position: fixed; inset: 0; background: rgba(10, 5, 15, 0.98); backdrop-filter: blur(20px); z-index: 2500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; transform: translateY(-100%); transition: 0.4s ease-in-out; opacity: 0; pointer-events: none; }
         [data-theme="light"] .mobile-menu { background: rgba(250, 249, 255, 0.98); }
         .mobile-menu.show { transform: translateY(0); opacity: 1; pointer-events: all; }
         .mobile-menu .nav-link { font-size: 18px; opacity: 1; }
@@ -266,14 +234,14 @@
             min-width: 250px;
             backdrop-filter: blur(10px);
         }
-        .partner-brand { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+        .partner-brand { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--primary); }
         .partner-count { font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 2px; }
 
         /* General Section Styling */
         .section { padding: 140px 80px; position: relative; }
         .section-header { text-align: center; margin-bottom: 80px; }
         .section-tag { color: var(--primary); font-size: 13px; letter-spacing: 4px; font-weight: 700; text-transform: uppercase; margin-bottom: 25px; display: block; }
-        .section-title { font-family: 'Space Grotesk', sans-serif; font-size: clamp(32px, 5vw, 48px); letter-spacing: -2px; font-weight: 700; }
+        .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 48px; letter-spacing: -2px; font-weight: 700; }
 
         /* Demo Engine Container */
         .demo-container { 
@@ -310,7 +278,7 @@
         [data-theme="light"] .demo-input { background: rgba(255,255,255,0.8); }
         .demo-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 20px var(--primary-glow); }
 
-        /* Template Grid for 35 Templates */
+        /* Modern Template Grid replacing the basic color blocks */
         .template-grid { 
             display: grid; 
             grid-template-columns: repeat(5, 1fr); 
@@ -326,20 +294,17 @@
         
         .temp-opt { 
             height: auto; 
+            padding: 6px;
             border-radius: 10px; 
             cursor: pointer; 
-            border: 2px solid transparent; 
+            border: 1px solid var(--border); 
             transition: 0.3s;
             position: relative;
             overflow: hidden;
             background: transparent;
-            padding: 5px;
         }
-        .temp-opt:hover { transform: translateY(-3px); }
-        .temp-opt.active { border-color: var(--primary); transform: scale(1.05); background: rgba(155, 93, 229, 0.1); box-shadow: 0 0 15px var(--primary-glow); }
-        
-        .template-preview-mini { height: 50px; background: white; border-radius: 5px; margin-bottom: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 7px; color: #333; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-        .template-name { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; color: var(--text-light); }
+        .temp-opt:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .temp-opt.active { border-color: var(--primary); background: rgba(155, 93, 229, 0.1); transform: scale(1.05); box-shadow: 0 0 15px var(--primary-glow); }
 
         .demo-viewport {
             height: 850px;
@@ -351,7 +316,37 @@
             border: 1px solid var(--border);
         }
 
-        iframe { width: 100%; height: 100%; border: none; }
+        .watermark-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .watermark-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 80px;
+            font-weight: 700;
+            color: rgba(0,0,0,0.04);
+            transform: rotate(-35deg);
+            white-space: nowrap;
+        }
+        .lock-badge {
+            background: rgba(155, 93, 229, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
 
         /* Request Form Card */
         .request-card {
@@ -367,8 +362,9 @@
             gap: 60px;
         }
 
-        .request-info h3 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(28px, 4vw, 42px); margin-bottom: 25px; line-height: 1.1; }
+        .request-info h3 { font-family: 'Space Grotesk', sans-serif; font-size: 42px; margin-bottom: 25px; line-height: 1.1; }
         .request-info p { opacity: 0.7; font-size: 18px; line-height: 1.7; margin-bottom: 40px; }
+        
         .request-form { display: flex; flex-direction: column; gap: 20px; }
 
         /* Footer */
@@ -386,7 +382,7 @@
             max-width: 1400px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
             gap: 60px;
             margin-bottom: 100px;
         }
@@ -404,16 +400,15 @@
             border-top: 1px solid var(--border); 
             display: flex; 
             justify-content: space-between; 
-            align-items: center; 
+            align-items: center;
         }
         .footer-copy { font-size: 11px; opacity: 0.4; text-transform: uppercase; letter-spacing: 2px; }
 
-        /* Mobile Optimization */
+        /* Mobile Optimization Overhaul */
         @media (max-width: 1100px) {
             nav { padding: 15px 25px; }
-            .nav-links { display: none; } /* Hide desktop nav */
-            .hamburger { display: flex; } /* Show hamburger */
-            
+            .nav-links { display: none; } 
+            .hamburger { display: flex; } 
             .hero { padding: 140px 25px 80px; }
             .section { padding: 100px 25px; }
             .demo-container { grid-template-columns: 1fr; gap: 40px; }
@@ -421,7 +416,6 @@
             .request-card { padding: 40px 25px; border-radius: 30px; grid-template-columns: 1fr; }
             .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
             .footer-bottom { flex-direction: column; gap: 20px; text-align: center; }
-            
             .template-grid { grid-template-columns: repeat(4, 1fr); }
         }
 
@@ -446,19 +440,6 @@
             .partner-card { min-width: 200px; padding: 20px; }
             .template-grid { grid-template-columns: repeat(2, 1fr); }
         }
-
-        /* Cookie Popup */
-        .cookie-popup {
-            position: fixed; bottom: 20px; left: 20px; background: rgba(10, 5, 15, 0.95);
-            backdrop-filter: blur(20px); border: 1px solid var(--border); padding: 25px;
-            border-radius: 20px; z-index: 10000; max-width: 350px; display: none;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: slideUp 0.5s ease-out;
-        }
-        .cookie-popup.show { display: block; }
-        .cookie-content h3 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; margin-bottom: 10px; color: var(--primary); }
-        .cookie-content p { font-size: 12px; opacity: 0.7; margin-bottom: 20px; line-height: 1.5; }
-        .cookie-btns { display: flex; gap: 10px; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
 <body data-theme="dark">
@@ -487,7 +468,6 @@
             </div>
             METAFORGE<span>ENGINE</span>
         </a>
-        
         <div class="nav-links">
             <a href="#prestige" class="nav-link">Prestige</a>
             <a href="#social" class="nav-link">Partners</a>
@@ -495,7 +475,7 @@
             <a href="#request" class="nav-link">Request Engine</a>
             <button class="theme-toggle" id="themeToggle"></button>
         </div>
-
+        
         <button class="hamburger" id="hamburgerBtn">
             <span></span>
             <span></span>
@@ -529,8 +509,7 @@
             <h2 class="section-title" style="font-size: 28px;">Active MetaForge Infrastructures</h2>
         </div>
         <div class="partners-track" id="partnersTrack">
-            <div style="color: #888; text-align: center; width: 100%;">Loading global partners...</div>
-        </div>
+            </div>
     </section>
 
     <section class="section" id="prestige">
@@ -604,13 +583,12 @@
                     <div id="tempSelector" class="template-grid">
                         </div>
                 </div>
-                <button class="btn btn-primary" style="width: 100%; margin-top: 25px; justify-content: center;" onclick="document.getElementById('demoFrame').contentWindow.print()">
-                    PRINT BRANDED PREVIEW
+                <button class="btn btn-primary" style="width: 100%; margin-top: 25px; justify-content: center;" onclick="printDemo()">
+                    GENERATE BRANDED PREVIEW
                 </button>
             </div>
-            
             <div class="demo-viewport">
-                <iframe id="demoFrame" src="demo.html"></iframe>
+                <iframe id="demoFrame" style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
         </div>
     </section>
@@ -689,7 +667,7 @@
 
                 <div class="demo-input-group" style="grid-column: span 2;">
                     <label>BUSINESS NATURE & STYLE PREFERENCES</label>
-                    <textarea id="orderDescription" class="demo-input" rows="3" placeholder="Describe your business (e.g., Real Estate, Tech) and any design preferences..."></textarea>
+                    <textarea id="orderDescription" class="demo-input" rows="3" placeholder="Describe your business (e.g., Real Estate, Tech, Retail) and any specific design/color preferences..."></textarea>
                 </div>
                 
                 <button class="btn btn-primary" style="grid-column: span 2; justify-content: center; margin-top: 20px;" onclick="submitRequest()">INITIALIZE BUILD REQUEST</button>
@@ -701,7 +679,7 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <div class="footer-brand">METAFORGE<span>ENGINE</span></div>
-                <p class="footer-desc" style="font-size: 13px; opacity: 0.6; line-height: 1.5;">The global standard for prestigious digital document infrastructure. Powered by SkillForge Digital & Co. LTD.</p>
+                <p class="footer-desc">The global standard for prestigious digital document infrastructure. Powered by SkillForge Digital & Co. LTD.</p>
             </div>
             <div class="footer-col">
                 <h4>Infrastructure</h4>
@@ -716,8 +694,8 @@
                 <h4>Company</h4>
                 <ul class="footer-links">
                     <li><a href="about/index.html">About MetaForge</a></li>
-                    <li><a href="faq.html">FAQ / Support</a></li>
                     <li><a href="#contact">Contact Elite Support</a></li>
+                    <li><a href="#careers">Authority Careers</a></li>
                 </ul>
             </div>
             <div class="footer-col">
@@ -731,24 +709,13 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p class="footer-copy">&copy; 2026 SkillForge Digital & Co. LTD. All Rights Reserved.</p>
+            <p class="footer-copy">&copy; 2026 SkillForge Digital & Co. LTD. All Rights Reserved. MetaForge Engine is a registered trademark.</p>
             <div style="display: flex; gap: 30px; opacity: 0.5; font-size: 11px;">
                 <span>ENCRYPTED INFRASTRUCTURE</span>
                 <span>SECURE PAYMENTS</span>
             </div>
         </div>
     </footer>
-
-    <div class="cookie-popup" id="cookiePopup">
-        <div class="cookie-content">
-            <h3>🍪 Cookie Authority</h3>
-            <p>We use cookies to ensure the integrity of your digital infrastructure and enhance your experience.</p>
-            <div class="cookie-btns">
-                <button onclick="acceptCookies()" class="btn btn-primary" style="padding: 10px 20px; font-size: 12px;">ACCEPT</button>
-                <button onclick="rejectCookies()" class="btn btn-outline" style="padding: 10px 20px; font-size: 12px;">DECLINE</button>
-            </div>
-        </div>
-    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -766,37 +733,291 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- Hamburger Menu Logic ---
+        // Mobile Menu JavaScript
         const hamburgerBtn = document.getElementById('hamburgerBtn');
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileLinks = document.querySelectorAll('.mobile-link');
-
-        hamburgerBtn.addEventListener('click', () => {
-            hamburgerBtn.classList.toggle('active');
-            mobileMenu.classList.toggle('show');
-        });
-
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                hamburgerBtn.classList.remove('active');
-                mobileMenu.classList.remove('show');
+        
+        if (hamburgerBtn && mobileMenu) {
+            hamburgerBtn.addEventListener('click', () => {
+                hamburgerBtn.classList.toggle('active');
+                mobileMenu.classList.toggle('show');
             });
-        });
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburgerBtn.classList.remove('active');
+                    mobileMenu.classList.remove('show');
+                });
+            });
+        }
 
-        // --- Live Firebase Partners ---
+        // 7-Day Dynamic Background Engine (Exactly as requested)
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        const day = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+
+        let particles = [];
+        let engineParts = [];
+        let gridLines = [];
+        let matrixDrops = [];
+        let waves = [];
+
+        function getThemeColors() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            return {
+                primary: isDark ? '#9B5DE5' : '#7038ba',
+                accent: isDark ? '#00BBF9' : '#007bb5',
+                bg: isDark ? '#0A050F' : '#FAF9FF'
+            };
+        }
+
+        function initBG() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            engineParts = [];
+            gridLines = [];
+            matrixDrops = [];
+            waves = [];
+            
+            if (day === 0) { // Sunday: Elegant Digital Particles
+                for(let i=0; i<80; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        r: Math.random() * 2 + 1,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5
+                    });
+                }
+            } else if (day === 1) { // Monday: Digital Circuitry
+                for(let i=0; i<15; i++) {
+                    engineParts.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        w: Math.random() * 200 + 50,
+                        h: 2, // Horizontal lines
+                        speed: Math.random() * 2 + 1,
+                        dir: Math.random() > 0.5 ? 1 : -1
+                    });
+                }
+            } else if (day === 2) { // Tuesday: Kinetic Engine (Rotating Nodes)
+                for(let i=0; i<8; i++) {
+                    engineParts.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        r: Math.random() * 50 + 30,
+                        angle: Math.random() * Math.PI * 2,
+                        speed: (Math.random() - 0.5) * 0.02
+                    });
+                }
+            } else if (day === 3) { // Wednesday: Network Mesh
+                for(let i=0; i<60; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        vx: (Math.random() - 0.5) * 0.8,
+                        vy: (Math.random() - 0.5) * 0.8
+                    });
+                }
+            } else if (day === 4) { // Thursday: Matrix Rain (Purple)
+                const columns = Math.floor(canvas.width / 20);
+                for(let i=0; i<columns; i++) {
+                    matrixDrops[i] = Math.random() * canvas.height; // Start at random heights
+                }
+            } else if (day === 5) { // Friday: Pulse Waves
+                for(let i=0; i<5; i++) {
+                    waves.push({
+                        y: canvas.height/2 + (Math.random()-0.5)*200,
+                        freq: 0.01 + Math.random()*0.02,
+                        amp: 50 + Math.random()*100,
+                        phase: Math.random()*Math.PI*2
+                    });
+                }
+            } else if (day === 6) { // Saturday: Geometric Grid (Perspective)
+                // Just setup generic perspective lines
+            }
+        }
+
+        function drawBG() {
+            const colors = getThemeColors();
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            
+            if (day === 0) { // Sunday: Particles
+                particles.forEach(p => {
+                    p.x += p.vx; p.y += p.vy;
+                    if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                    ctx.fillStyle = colors.primary;
+                    ctx.fill();
+                    
+                    particles.forEach(p2 => {
+                        let dx = p.x - p2.x;
+                        let dy = p.y - p2.y;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        if(dist < 120) {
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.strokeStyle = `rgba(155, 93, 229, ${0.1 * (1 - dist/120)})`;
+                            ctx.stroke();
+                        }
+                    });
+                });
+
+            } else if (day === 1) { // Monday: Circuit Lines
+                engineParts.forEach(p => {
+                    p.x += p.speed * p.dir;
+                    if(p.x > canvas.width + p.w) p.x = -p.w;
+                    if(p.x < -p.w) p.x = canvas.width + p.w;
+                    
+                    ctx.fillStyle = `rgba(155, 93, 229, 0.2)`;
+                    ctx.fillRect(p.x, p.y, p.w, p.h);
+                    
+                    // Head of the pulse
+                    ctx.fillStyle = colors.accent;
+                    ctx.fillRect(p.dir > 0 ? p.x + p.w : p.x, p.y - 1, 4, 4);
+                });
+
+            } else if (day === 2) { // Tuesday: Gears
+                engineParts.forEach(p => {
+                    p.angle += p.speed;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.angle);
+                    
+                    ctx.beginPath();
+                    // Draw Gear shape
+                    for (let i = 0; i < 6; i++) {
+                        ctx.rotate(Math.PI / 3);
+                        ctx.rect(-5, -p.r, 10, 10);
+                    }
+                    ctx.strokeStyle = `rgba(155, 93, 229, 0.3)`;
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.arc(0, 0, p.r - 5, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(0, 187, 249, 0.3)`;
+                    ctx.stroke();
+                    
+                    ctx.restore();
+                });
+
+            } else if (day === 3) { // Wednesday: Mesh
+                particles.forEach(p => {
+                    p.x += p.vx; p.y += p.vy;
+                    if(p.x < 0) p.x = canvas.width;
+                    if(p.x > canvas.width) p.x = 0;
+                    if(p.y < 0) p.y = canvas.height;
+                    if(p.y > canvas.height) p.y = 0;
+                });
+                
+                // Draw Connections
+                for(let i=0; i<particles.length; i++) {
+                    for(let j=i+1; j<particles.length; j++) {
+                        let dx = particles[i].x - particles[j].x;
+                        let dy = particles[i].y - particles[j].y;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        if(dist < 150) {
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(155, 93, 229, ${0.15 * (1 - dist/150)})`;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+            } else if (day === 4) { // Thursday: Matrix Rain
+                ctx.fillStyle = colors.primary;
+                ctx.font = '12px monospace';
+                for(let i=0; i<matrixDrops.length; i++) {
+                    const text = String.fromCharCode(0x30A0 + Math.random() * 96);
+                    const x = i * 20;
+                    const y = matrixDrops[i] * 20;
+                    
+                    ctx.globalAlpha = 0.3;
+                    ctx.fillText(text, x, y);
+                    ctx.globalAlpha = 1.0;
+                    
+                    if(y > canvas.height && Math.random() > 0.975) {
+                        matrixDrops[i] = 0;
+                    }
+                    matrixDrops[i]++;
+                }
+
+            } else if (day === 5) { // Friday: Waves
+                waves.forEach(w => {
+                    w.phase += w.freq;
+                    ctx.beginPath();
+                    for(let x=0; x<canvas.width; x+=10) {
+                        let y = w.y + Math.sin(x*0.01 + w.phase) * w.amp;
+                        ctx.lineTo(x, y);
+                    }
+                    ctx.strokeStyle = `rgba(0, 187, 249, 0.2)`;
+                    ctx.stroke();
+                });
+
+            } else if (day === 6) { // Saturday: Grid
+                const time = Date.now() * 0.0005;
+                const width = canvas.width;
+                const height = canvas.height;
+                
+                // Moving floor
+                ctx.beginPath();
+                for(let i=0; i<width; i+=100) {
+                    ctx.moveTo(width/2, height/2); // Horizon
+                    ctx.lineTo(i + (i-width/2)*2, height);
+                }
+                ctx.strokeStyle = `rgba(155, 93, 229, 0.2)`;
+                ctx.stroke();
+                
+                // Horizontal lines moving
+                let offset = (Date.now() % 1000) / 1000 * 50;
+                for(let y=height/2; y<height; y+=50) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y + offset);
+                    ctx.lineTo(width, y + offset);
+                    ctx.stroke();
+                }
+            }
+            
+            requestAnimationFrame(drawBG);
+        }
+
+        window.addEventListener('resize', initBG);
+        initBG(); drawBG();
+
+        // Theme Authority
+        const themeBtn = document.getElementById('themeToggle');
+        document.body.setAttribute('data-theme', 'dark');
+        themeBtn.textContent = '🌙';
+
+        themeBtn.onclick = () => {
+            const current = document.body.getAttribute('data-theme');
+            const target = current === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', target);
+            themeBtn.textContent = target === 'light' ? '☀️' : '🌙';
+        };
+
+        // Social Proof Authority (Live from Firestore)
         function listenToPartners() {
             const track = document.getElementById('partnersTrack');
-            const q = query(collection(db, "short_urls"), orderBy("created_at", "desc"), limit(15));
             
+            const q = query(collection(db, "short_urls"), orderBy("created_at", "desc"), limit(15));
             onSnapshot(q, (snapshot) => {
                 if(!snapshot.empty) {
                     track.innerHTML = '';
                     const docs = snapshot.docs.map(d => ({
                         name: d.data().brandName || 'MetaForge Client',
-                        docs: Math.floor(Math.random() * 5000) + 1000 
+                        docs: Math.floor(Math.random() * 500) + 100 // Visual count
                     }));
-
-                    [...docs, ...docs].forEach(partner => {
+                    
+                    // Triplicate data for seamless infinite scroll
+                    [...docs, ...docs, ...docs].forEach(partner => {
                         const card = document.createElement('div');
                         card.className = 'partner-card';
                         const letter = partner.name.charAt(0).toUpperCase();
@@ -806,34 +1027,47 @@
                             </div>
                             <div class="partner-brand">${partner.name.toUpperCase()}</div>
                             <div class="partner-count">
-                                <span style="color: var(--accent); font-weight: 700;">${partner.docs.toLocaleString()}+</span> 
+                                <span style="color: var(--accent); font-weight: 700;">${partner.docs.toLocaleString()}</span> 
                                 DOCUMENTS GENERATED
                             </div>
                         `;
                         track.appendChild(card);
                     });
                 } else {
-                    track.innerHTML = `
-                        <div class="partner-card"><div class="partner-brand">APEX HOLDINGS</div><div class="partner-count">1,420+ DOCUMENTS</div></div>
-                        <div class="partner-card"><div class="partner-brand">NEXUS ENERGY</div><div class="partner-count">3,400+ DOCUMENTS</div></div>
-                        <div class="partner-card"><div class="partner-brand">CIPHER TECH</div><div class="partner-count">5,300+ DOCUMENTS</div></div>
-                    `;
+                    // Fallback mock data if db is empty so it doesn't look broken
+                    const mock = [{name: "Apex Holdings", docs: 1420}, {name: "Zenith Capital", docs: 850}, {name: "Orbit Logistics", docs: 2100}];
+                    track.innerHTML = '';
+                    [...mock, ...mock, ...mock].forEach(partner => {
+                        const card = document.createElement('div');
+                        card.className = 'partner-card';
+                        const letter = partner.name.charAt(0).toUpperCase();
+                        card.innerHTML = `
+                            <div style="width: 40px; height: 40px; background: rgba(155, 93, 229, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary); margin-bottom: 5px; border: 1px solid var(--border);">
+                                ${letter}
+                            </div>
+                            <div class="partner-brand">${partner.name.toUpperCase()}</div>
+                            <div class="partner-count">
+                                <span style="color: var(--accent); font-weight: 700;">${partner.docs.toLocaleString()}</span> 
+                                DOCUMENTS GENERATED
+                            </div>
+                        `;
+                        track.appendChild(card);
+                    });
                 }
             });
         }
         listenToPartners();
 
-        // --- Demo Engine Logic (35 Templates) ---
+        // Demo Engine Architecture (Replaced solid colors with structural previews)
         const temps = [
-            'modern-tech', 'minimalist-pro', 'corporate-luxe', 'legal-professional', 'cyber-punk',
-            'retro-wave', 'neo-brutalist', 'startup-modern', 'royal-elegance', 'art-deco',
-            'fashion-boutique', 'hotel-resort', 'clean-air', 'swiss-design', 'japanese-minimal',
-            'compact-slip', 'midnight-special', 'garage-workshop', 'bold-stripe', 'fitness-gym',
-            'pharmacy-medical', 'bakery-sweet', 'nature-organic', 'salon-beauty', 'restaurant-diner',
-            'construction-industrial', 'education-academy', 'transport-logistics', 'real-estate', 'event-planning',
-            'curved-organic', 'geometric-slice', 'vintage-ticket', 'futuristic-glass', 'stamp-quality'
+            'modern-tech', 'minimalist-pro', 'corporate-luxe', 'midnight-special', 'cyber-punk',
+            'futuristic-glass', 'royal-elegance', 'clean-air', 'geometric-slice', 'vintage-ticket',
+            'art-deco', 'fashion-boutique', 'hotel-resort', 'swiss-design', 'japanese-minimal',
+            'compact-slip', 'garage-workshop', 'bold-stripe', 'fitness-gym', 'pharmacy-medical',
+            'bakery-sweet', 'nature-organic', 'salon-beauty', 'restaurant-diner', 'construction-industrial',
+            'education-academy', 'transport-logistics', 'real-estate', 'event-planning', 'curved-organic',
+            'geometric-slice', 'vintage-ticket', 'futuristic-glass', 'stamp-quality'
         ];
-        
         let activeTemp = 'modern-tech';
         const selector = document.getElementById('tempSelector');
         
@@ -852,16 +1086,26 @@
         temps.forEach(t => {
             const div = document.createElement('div');
             div.className = `temp-opt ${t === activeTemp ? 'active' : ''}`;
-            div.title = t.replace(/-/g, ' ');
+            // Structured visual preview block
+            div.style.cssText = "height: auto; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: 0.3s;";
+            div.title = t.replace(/-/g, ' ').toUpperCase();
             div.onclick = () => {
-                document.querySelectorAll('.temp-opt').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.temp-opt').forEach(el => {
+                    el.classList.remove('active');
+                    el.style.borderColor = 'var(--border)';
+                    el.style.background = 'transparent';
+                    el.style.transform = 'scale(1)';
+                });
                 div.classList.add('active');
+                div.style.borderColor = 'var(--primary)';
+                div.style.background = 'rgba(155, 93, 229, 0.1)';
+                div.style.transform = 'scale(1.05)';
                 activeTemp = t;
                 refreshDemo();
             };
             div.innerHTML = `
-                <div class="template-preview-mini" style="${getPreviewStyle(t)}"></div>
-                <div class="template-name">${t.replace(/-/g, ' ')}</div>
+                <div style="width: 100%; height: 35px; border-radius: 4px; margin-bottom: 5px; ${getPreviewStyle(t)}"></div>
+                <div style="font-size: 8px; text-transform: uppercase; font-weight: 700; text-align: center; color: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${t.replace(/-/g, ' ')}</div>
             `;
             selector.appendChild(div);
         });
@@ -881,20 +1125,19 @@
             const brand = document.getElementById('demoBrand').value || 'METAFORGE ELITE';
             const rc = document.getElementById('demoRC').value || 'RC 000000';
             const ph = document.getElementById('demoPhone').value || '+234 800 000 000';
-            const email = document.getElementById('demoEmail').value || 'demo@brand.com';
+            const email = document.getElementById('demoEmail').value || 'demo@metaforge.website';
             const pc = document.getElementById('demoColorPrimary').value || '#9B5DE5';
-            const sc = document.getElementById('demoColorSecondary').value || '#120A1A';
             
             const config = { 
-                bn: brand, ph: ph, rc: rc, em: email, tp: activeTemp, pc: pc, sc: sc,
-                dtp: "INVOICE",
+                bn: brand, ph, rc, em: email, tp: activeTemp, pc, 
+                isDemo: true, 
                 locked: true,
                 ts: Date.now() 
             };
-            
             const encoded = encodeData(config);
             document.getElementById('demoFrame').src = 'demo.html#' + encoded;
         };
+        refreshDemo();
 
         window.updateColorPreview = (type) => {
             const val = document.getElementById('demoColor' + type.charAt(0).toUpperCase() + type.slice(1)).value;
@@ -918,7 +1161,6 @@
             const secondary = document.getElementById('orderColorSec').value;
             const terms = document.getElementById('orderTerms').value;
             const footer = document.getElementById('orderFooter').value;
-            const desc = document.getElementById('orderDescription').value;
 
             if(!brand || !email || !wa) return alert("Required fields missing: Brand Name, Email, and WhatsApp are mandatory.");
             
@@ -927,135 +1169,48 @@
                     brandName: brand, email, whatsApp: wa, tagline, rc, address,
                     bankName: bank, accNumber: accNum, accName, currency, vatRate: vat,
                     primaryColor: primary, secondaryColor: secondary, terms, footerNote: footer,
-                    description: desc, timestamp: serverTimestamp(), status: 'pending'
+                    timestamp: serverTimestamp(), status: 'pending'
                 });
-                alert("Build initialization successful. Our team will contact you shortly.");
+                alert("Build initialization successful. Our team will contact you shortly for activation.");
                 document.getElementById('orderBrand').value = '';
                 document.getElementById('orderEmail').value = '';
-                document.getElementById('orderWhatsApp').value = '';
             } catch(e) { alert("Error: " + e.message); }
         };
 
-        // Theme Toggle Logic
-        const themeBtn = document.getElementById('themeToggle');
-        themeBtn.textContent = '🌙';
-        themeBtn.onclick = () => {
-            const current = document.body.getAttribute('data-theme');
-            const target = current === 'light' ? 'dark' : 'light';
-            document.body.setAttribute('data-theme', target);
-            themeBtn.textContent = target === 'light' ? '☀️' : '🌙';
-        };
-
-        // --- FULL 7-DAY DYNAMIC BACKGROUND ENGINE RESTORED ---
-        const canvas = document.getElementById('bgCanvas');
-        const ctx = canvas.getContext('2d');
-        const day = new Date().getDay(); 
-
-        let particles = [], engineParts = [], gridLines = [], matrixDrops = [], waves = [];
-
-        function getThemeColors() {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            return {
-                primary: isDark ? '#9B5DE5' : '#7038ba',
-                accent: isDark ? '#00BBF9' : '#007bb5'
-            };
-        }
-
-        function initBG() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            particles = []; engineParts = []; matrixDrops = []; waves = [];
-            
-            if (day === 0) { 
-                for(let i=0; i<80; i++) particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, r: Math.random() * 2 + 1, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5 });
-            } else if (day === 1) { 
-                for(let i=0; i<15; i++) engineParts.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, w: Math.random() * 200 + 50, h: 2, speed: Math.random() * 2 + 1, dir: Math.random() > 0.5 ? 1 : -1 });
-            } else if (day === 2) { 
-                for(let i=0; i<8; i++) engineParts.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, r: Math.random() * 50 + 30, angle: Math.random() * Math.PI * 2, speed: (Math.random() - 0.5) * 0.02 });
-            } else if (day === 3) { 
-                for(let i=0; i<60; i++) particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.8, vy: (Math.random() - 0.5) * 0.8 });
-            } else if (day === 4) { 
-                const columns = Math.floor(canvas.width / 20);
-                for(let i=0; i<columns; i++) matrixDrops[i] = Math.random() * canvas.height;
-            } else if (day === 5) { 
-                for(let i=0; i<5; i++) waves.push({ y: canvas.height/2 + (Math.random()-0.5)*200, freq: 0.01 + Math.random()*0.02, amp: 50 + Math.random()*100, phase: Math.random()*Math.PI*2 });
-            }
-        }
-
-        function drawBG() {
-            const colors = getThemeColors();
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            
-            if (day === 0) { 
-                particles.forEach(p => {
-                    p.x += p.vx; p.y += p.vy;
-                    if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                    if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
-                    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fillStyle = colors.primary; ctx.fill();
-                    particles.forEach(p2 => {
-                        let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                        if(dist < 120) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.strokeStyle = `rgba(155, 93, 229, ${0.1 * (1 - dist/120)})`; ctx.stroke(); }
-                    });
-                });
-            } else if (day === 1) { 
-                engineParts.forEach(p => {
-                    p.x += p.speed * p.dir;
-                    if(p.x > canvas.width + p.w) p.x = -p.w;
-                    if(p.x < -p.w) p.x = canvas.width + p.w;
-                    ctx.fillStyle = `rgba(155, 93, 229, 0.2)`; ctx.fillRect(p.x, p.y, p.w, p.h);
-                    ctx.fillStyle = colors.accent; ctx.fillRect(p.dir > 0 ? p.x + p.w : p.x, p.y - 1, 4, 4);
-                });
-            } else if (day === 2) { 
-                engineParts.forEach(p => {
-                    p.angle += p.speed;
-                    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
-                    ctx.beginPath();
-                    for (let i = 0; i < 6; i++) { ctx.rotate(Math.PI / 3); ctx.rect(-5, -p.r, 10, 10); }
-                    ctx.strokeStyle = `rgba(155, 93, 229, 0.3)`; ctx.stroke();
-                    ctx.beginPath(); ctx.arc(0, 0, p.r - 5, 0, Math.PI * 2); ctx.strokeStyle = `rgba(0, 187, 249, 0.3)`; ctx.stroke();
-                    ctx.restore();
-                });
-            } else if (day === 3) { 
-                particles.forEach(p => {
-                    p.x += p.vx; p.y += p.vy;
-                    if(p.x < 0) p.x = canvas.width; if(p.x > canvas.width) p.x = 0;
-                    if(p.y < 0) p.y = canvas.height; if(p.y > canvas.height) p.y = 0;
-                });
-                for(let i=0; i<particles.length; i++) {
-                    for(let j=i+1; j<particles.length; j++) {
-                        let dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
-                        if(dist < 150) { ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.strokeStyle = `rgba(155, 93, 229, ${0.15 * (1 - dist/150)})`; ctx.stroke(); }
-                    }
-                }
-            } else if (day === 4) { 
-                ctx.fillStyle = colors.primary; ctx.font = '12px monospace';
-                for(let i=0; i<matrixDrops.length; i++) {
-                    const text = String.fromCharCode(0x30A0 + Math.random() * 96);
-                    ctx.globalAlpha = 0.3; ctx.fillText(text, i * 20, matrixDrops[i] * 20); ctx.globalAlpha = 1.0;
-                    if(matrixDrops[i] * 20 > canvas.height && Math.random() > 0.975) matrixDrops[i] = 0;
-                    matrixDrops[i]++;
-                }
-            } else if (day === 5) { 
-                waves.forEach(w => {
-                    w.phase += w.freq; ctx.beginPath();
-                    for(let x=0; x<canvas.width; x+=10) ctx.lineTo(x, w.y + Math.sin(x*0.01 + w.phase) * w.amp);
-                    ctx.strokeStyle = `rgba(0, 187, 249, 0.2)`; ctx.stroke();
-                });
-            } else if (day === 6) { 
-                let offset = (Date.now() % 1000) / 1000 * 50;
-                ctx.beginPath();
-                for(let i=0; i<canvas.width; i+=100) { ctx.moveTo(canvas.width/2, canvas.height/2); ctx.lineTo(i + (i-canvas.width/2)*2, canvas.height); }
-                ctx.strokeStyle = `rgba(155, 93, 229, 0.2)`; ctx.stroke();
-                for(let y=canvas.height/2; y<canvas.height; y+=50) { ctx.beginPath(); ctx.moveTo(0, y + offset); ctx.lineTo(canvas.width, y + offset); ctx.stroke(); }
-            }
-            requestAnimationFrame(drawBG);
-        }
-
-        window.addEventListener('resize', initBG);
-        initBG(); drawBG();
-
-        setTimeout(refreshDemo, 500);
+        window.printDemo = () => document.getElementById('demoFrame').contentWindow.print();
     </script>
+    <div class="cookie-popup" id="cookiePopup">
+        <div class="cookie-content">
+            <h3>🍪 Cookie Authority</h3>
+            <p>We use cookies to ensure the integrity of your digital infrastructure and enhance your experience.</p>
+            <div class="cookie-btns">
+                <button onclick="acceptCookies()" class="btn btn-primary" style="padding: 10px 20px; font-size: 12px;">ACCEPT</button>
+                <button onclick="rejectCookies()" class="btn btn-outline" style="padding: 10px 20px; font-size: 12px;">DECLINE</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .cookie-popup {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(10, 5, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            padding: 25px;
+            border-radius: 20px;
+            z-index: 10000;
+            max-width: 350px;
+            display: none;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: slideUp 0.5s ease-out;
+        }
+        .cookie-popup.show { display: block; }
+        .cookie-content h3 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; margin-bottom: 10px; color: var(--primary); }
+        .cookie-content p { font-size: 12px; opacity: 0.7; margin-bottom: 20px; line-height: 1.5; }
+        .cookie-btns { display: flex; gap: 10px; }
+    </style>
 
     <script>
         function checkCookies() {
