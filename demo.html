@@ -7,20 +7,24 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600&family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;700;900&family=Dancing+Script:wght@400;700&family=Cinzel:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700;900&family=Oswald:wght@300;400;500;700&family=Raleway:wght@300;400;500;700;900&family=Bebas+Neue&family=Lora:wght@400;500;700&family=Inter:wght@300;400;500;700;900&family=Sora:wght@300;400;500;700;800&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    
     <style>
         :root {
             --brand-primary: #9B5DE5;
+            --brand-primary-light: #B889F0;
             --brand-secondary: #120A1A;
             --brand-dark: #0A050F;
             --brand-gray: #4A4A4A;
             --brand-light: #F5F5F5;
+            
             --tpl-primary: var(--brand-primary);
             --tpl-secondary: var(--brand-secondary);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         
-        /* Flex body to center the scaling container */
         body { 
             background: transparent; 
             font-family: 'Inter', sans-serif; 
@@ -30,6 +34,13 @@
             justify-content: center;
             align-items: flex-start;
             padding-top: 10px;
+        }
+
+        /* Responsive Scaling Fixes for "Hanging" Bug */
+        .receipt-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100%;
         }
 
         /* Base A4 Receipt Container */
@@ -44,11 +55,14 @@
             color: #1a1a1a; 
             font-size: 12px; 
             overflow: hidden; 
+            box-sizing: border-box; 
             transform-origin: top center; 
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            transform: scale(0.85); /* Default scale */
+            margin-bottom: -40mm;
         }
 
-        /* Responsive Scaling Fixes for "Hanging" Bug */
+        /* Iframe Media Queries */
         @media (max-width: 1400px) { .receipt-container { transform: scale(0.9); margin-bottom: -30mm; } }
         @media (max-width: 1200px) { .receipt-container { transform: scale(0.75); margin-bottom: -70mm; } }
         @media (max-width: 992px) { .receipt-container { transform: scale(0.65); margin-bottom: -100mm; } }
@@ -225,14 +239,6 @@
         .tpl-compact-slip .items-table th { background: transparent; color: #000; border-bottom: 1px solid #000; }
         .tpl-compact-slip .totals-box { border-top: 2px solid #000; border-radius: 0; }
 
-        .tpl-midnight-special { font-family: 'Space Grotesk', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; border-radius: 15px; }
-        .tpl-midnight-special .receipt-header { border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .tpl-midnight-special .doc-type-badge { background: var(--tpl-primary); color: white; border-radius: 8px; }
-        .tpl-midnight-special .info-value { background: rgba(255,255,255,0.05); border: none; color: #fff; }
-        .tpl-midnight-special .items-table th { background: rgba(255,255,255,0.1); color: var(--tpl-primary); }
-        .tpl-midnight-special .totals-box { background: rgba(255,255,255,0.05); border-color: var(--tpl-primary); }
-        .tpl-midnight-special .stamp-outer { background: rgba(26,26,46,0.95); }
-
         .tpl-garage-workshop { font-family: 'Oswald', sans-serif; background: #1a1a1a; color: #fff; border: 4px solid var(--tpl-primary); }
         .tpl-garage-workshop .receipt-header { border-bottom: 2px solid var(--tpl-primary); }
         .tpl-garage-workshop .doc-type-badge { background: var(--tpl-primary); color: #000; clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%); }
@@ -251,7 +257,7 @@
 
         .tpl-fitness-gym { font-family: 'Oswald', sans-serif; background: #111; color: white; border: 4px solid var(--tpl-primary); }
         .tpl-fitness-gym .receipt-header { border-bottom: 3px solid var(--tpl-primary); }
-        .tpl-fitness-gym .doc-type-badge { background: var(--tpl-primary); color: #000; }
+        .tpl-fitness-gym .doc-type-badge { background: var(--tpl-primary); color: #000; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%); }
         .tpl-fitness-gym .info-value { background: #222; border: none; color: white; }
         .tpl-fitness-gym .items-table th { background: var(--tpl-primary); color: #000; }
         .tpl-fitness-gym .totals-box { background: var(--tpl-primary); color: #000; }
@@ -333,8 +339,8 @@
         .tpl-curved-organic .totals-box { background: var(--tpl-secondary); border-radius: 30px; color: white; border: none; }
 
         .tpl-geometric-slice { font-family: 'Space Grotesk', sans-serif; background: #fff; border: 2px solid #000; }
-        .tpl-geometric-slice .receipt-header { background: #000; color: white; padding: 60px 40px; clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%); }
-        .tpl-geometric-slice .doc-type-badge { font-size: 60px; opacity: 0.1; background: transparent; position: absolute; right: 20px; box-shadow: none; transform: none; }
+        .tpl-geometric-slice .receipt-header { background: #000; color: white; padding: 60px 40px; clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%); min-height: 220px; }
+        .tpl-geometric-slice .doc-type-badge { font-size: 60px; opacity: 0.1; background: transparent; position: absolute; top: 10px; right: 20px; transform: none; box-shadow: none; }
         .tpl-geometric-slice .items-table th { border: 2px solid #000; background: var(--tpl-primary); color: #000; }
         .tpl-geometric-slice .items-table td { border: 2px solid #000; }
         .tpl-geometric-slice .totals-box { border: 4px solid #000; border-radius: 0; background: #fff; }
@@ -342,10 +348,10 @@
         .tpl-vintage-ticket { font-family: 'Roboto Mono', monospace; background: #fef9e7; border: 2px solid #d4c4a8; }
         .tpl-vintage-ticket .receipt-header { text-align: center; border-bottom: 2px dashed #d4c4a8; background: transparent; color: #7d6b5d; }
         .tpl-vintage-ticket .header-content { flex-direction: column; align-items: center; }
-        .tpl-vintage-ticket .doc-type-badge { background: transparent; color: #a69076; font-size: 14px; letter-spacing: 5px; box-shadow: none; }
+        .tpl-vintage-ticket .doc-type-badge { background: transparent; color: #a69076; font-size: 14px; letter-spacing: 5px; box-shadow: none; margin-top: 15px; }
         .tpl-vintage-ticket .items-table th { background: transparent; color: #a69076; border-bottom: 1px solid #d4c4a8; }
         .tpl-vintage-ticket .items-table td { border-bottom: 1px dotted #d4c4a8; }
-        .tpl-vintage-ticket .totals-box { border: none; background: transparent; border-top: 2px dashed #d4c4a8; border-radius: 0; }
+        .tpl-vintage-ticket .totals-box { border: none; background: transparent; }
 
         .tpl-futuristic-glass { font-family: 'Rajdhani', sans-serif; background: linear-gradient(135deg, #121212 0%, #1e1e1e 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
         .tpl-futuristic-glass .receipt-header { background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -357,15 +363,15 @@
         .tpl-futuristic-glass .stamp-outer { background: transparent; }
 
         .tpl-stamp-quality { font-family: 'Cinzel', serif; background: #fff; border: 15px solid #f0f0f0; }
-        .tpl-stamp-quality .receipt-header { text-align: center; background: transparent; color: #1a1a1a; }
+        .tpl-stamp-quality .receipt-header { text-align: center; background: transparent; color: #1a1a1a; border-bottom: none; }
         .tpl-stamp-quality .header-content { flex-direction: column; align-items: center; }
-        .tpl-stamp-quality .doc-type-badge { border-top: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a; background: transparent; color: #1a1a1a; transform: none; box-shadow: none; letter-spacing: 10px; border-radius: 0; }
+        .tpl-stamp-quality .doc-type-badge { border-top: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a; background: transparent; color: #1a1a1a; transform: none; box-shadow: none; letter-spacing: 10px; border-radius: 0; width: auto; padding: 10px 50px; }
         .tpl-stamp-quality .items-table th { border-bottom: 2px solid #1a1a1a; background: transparent; color: #1a1a1a; }
         .tpl-stamp-quality .totals-box { border: 4px double var(--tpl-primary); background: transparent; }
 
         /* Handle Swiss Design Structure */
         .tpl-swiss-design { font-family: 'Inter', sans-serif; background: #fff; flex-direction: row !important; }
-        .tpl-swiss-design .sidebar { width: 180px; background: var(--tpl-primary); color: white; padding: 30px; display: flex; flex-direction: column; justify-content: space-between; }
+        .tpl-swiss-design .sidebar { width: 180px; background: var(--tpl-primary); color: white; padding: 30px; display: flex; flex-direction: column; justify-content: space-between; min-height: 297mm; }
         .tpl-swiss-design .sidebar .brand-name { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 24px; }
         .tpl-swiss-design .sidebar .doc-type-badge { font-size: 24px; font-weight: 900; opacity: 0.3; background: transparent; padding: 0; box-shadow: none; transform: none; }
         .tpl-swiss-design .main-content { flex: 1; padding: 30px; position: relative; }
@@ -374,117 +380,119 @@
     </style>
 </head>
 <body>
-    <div class="receipt-container tpl-modern-tech" id="receipt">
-        <div class="demo-lock-overlay"><div class="demo-lock-text">PREVIEW</div></div>
-        <div class="page-watermark" id="watermark">BRAND NAME</div>
-        <div class="security-layer"></div>
+    <div class="receipt-wrapper">
+        <div class="receipt-container tpl-modern-tech" id="receipt">
+            <div class="demo-lock-overlay"><div class="demo-lock-text">PREVIEW</div></div>
+            <div class="page-watermark" id="watermark">BRAND NAME</div>
+            <div class="security-layer"></div>
 
-        <header class="receipt-header" id="normalHeader">
-            <div class="header-content">
-                <div class="brand-block">
-                    <div class="brand-name" id="brandNameDisplay">BRAND<span>NAME</span></div>
-                    <div class="brand-tagline" id="taglineDisplay">Digital Infrastructure</div>
-                    <div class="brand-contact">
-                        <div><strong>RC:</strong> <span id="rcDisplay">RC 000000</span></div>
-                        <div><strong>Address:</strong> Business Address Here</div>
-                        <div><strong>Tel:</strong> <span id="telDisplay">+234 000 000 000</span></div>
+            <header class="receipt-header" id="normalHeader">
+                <div class="header-content">
+                    <div class="brand-block">
+                        <div class="brand-name" id="brandNameDisplay">BRAND<span>NAME</span></div>
+                        <div class="brand-tagline" id="taglineDisplay">Digital Infrastructure</div>
+                        <div class="brand-contact">
+                            <div><strong>RC:</strong> <span id="rcDisplay">RC 000000</span></div>
+                            <div><strong>Address:</strong> Business Address Here</div>
+                            <div><strong>Tel:</strong> <span id="telDisplay">+234 000 000 000</span></div>
+                        </div>
+                    </div>
+                    <div class="doc-type-badge" id="docTypeDisplay">INVOICE</div>
+                </div>
+            </header>
+
+            <section class="info-section">
+                <div class="info-block full-width">
+                    <div class="info-label">Customer Name</div>
+                    <div class="info-value">Demo Client</div>
+                </div>
+                <div class="info-block">
+                    <div class="info-label">Date</div>
+                    <div class="info-value" id="currentDate">2026-03-12</div>
+                </div>
+                <div class="info-block">
+                    <div class="info-label">Reference</div>
+                    <div class="info-value">#MF-DEMO</div>
+                </div>
+            </section>
+
+            <section class="items-section">
+                <div class="section-header">
+                    <div class="section-line"></div>
+                    <div class="section-title">Services</div>
+                    <div class="section-line" style="background: linear-gradient(to left, var(--tpl-primary), transparent);"></div>
+                </div>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">Qty</th>
+                            <th>Description</th>
+                            <th style="text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="text-align: center;">1</td>
+                            <td>Enterprise Infrastructure License</td>
+                            <td style="text-align: right;">₦ 150,000.00</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">1</td>
+                            <td>Premium Configuration Setup</td>
+                            <td style="text-align: right;">₦ 25,000.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <div class="bottom-section">
+                <div class="words-section">
+                    <div class="words-box">
+                        <div class="words-label">Amount in Words</div>
+                        <div class="words-value">One Hundred and Seventy Five Thousand Naira Only</div>
                     </div>
                 </div>
-                <div class="doc-type-badge" id="docTypeDisplay">INVOICE</div>
-            </div>
-        </header>
-
-        <section class="info-section">
-            <div class="info-block full-width">
-                <div class="info-label">Customer Name</div>
-                <div class="info-value">Demo Client</div>
-            </div>
-            <div class="info-block">
-                <div class="info-label">Date</div>
-                <div class="info-value" id="currentDate">2026-03-11</div>
-            </div>
-            <div class="info-block">
-                <div class="info-label">Reference</div>
-                <div class="info-value">#MF-DEMO</div>
-            </div>
-        </section>
-
-        <section class="items-section">
-            <div class="section-header">
-                <div class="section-line"></div>
-                <div class="section-title">Services</div>
-                <div class="section-line" style="background: linear-gradient(to left, var(--tpl-primary), transparent);"></div>
-            </div>
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th style="width: 10%;">Qty</th>
-                        <th>Description</th>
-                        <th style="text-align: right;">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="text-align: center;">1</td>
-                        <td>Enterprise Infrastructure License</td>
-                        <td style="text-align: right;">₦ 150,000.00</td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: center;">1</td>
-                        <td>Premium Configuration Setup</td>
-                        <td style="text-align: right;">₦ 25,000.00</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-
-        <div class="bottom-section">
-            <div class="words-section">
-                <div class="words-box">
-                    <div class="words-label">Amount in Words</div>
-                    <div class="words-value">One Hundred and Seventy Five Thousand Naira Only</div>
-                </div>
-            </div>
-            <div class="totals-section">
-                <div class="totals-box">
-                    <div class="total-row">
-                        <span class="total-label">Subtotal</span>
-                        <span class="total-value">₦ 175,000.00</span>
-                    </div>
-                    <div class="total-row">
-                        <span class="total-label">VAT (0%)</span>
-                        <span class="total-value">₦ 0.00</span>
-                    </div>
-                    <div class="total-row">
-                        <span class="total-label">TOTAL</span>
-                        <span class="total-value grand">₦ 175,000.00</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <section class="signature-section">
-            <div class="signature-box">
-                <div class="signature-line"></div>
-                <div class="signature-label">Customer Acceptance</div>
-            </div>
-            <div class="signature-box">
-                <div class="digital-stamp" id="digitalStamp">
-                    <div class="stamp-outer">
-                        <div class="stamp-inner"></div>
-                        <div class="stamp-content">
-                            <div class="stamp-status">PREVIEW</div>
-                            <div class="stamp-authority" id="stampAuthority">METAFORGE</div>
+                <div class="totals-section">
+                    <div class="totals-box">
+                        <div class="total-row">
+                            <span class="total-label">Subtotal</span>
+                            <span class="total-value">₦ 175,000.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">VAT (0%)</span>
+                            <span class="total-value">₦ 0.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">TOTAL</span>
+                            <span class="total-value grand">₦ 175,000.00</span>
                         </div>
                     </div>
                 </div>
-                <div class="signature-line"></div>
-                <div class="signature-label">Authority Stamp</div>
             </div>
-        </section>
 
-        <div class="footer-message">
-            <div class="message-text">Generated via MetaForge Engine</div>
+            <section class="signature-section">
+                <div class="signature-box">
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Customer Acceptance</div>
+                </div>
+                <div class="signature-box">
+                    <div class="digital-stamp" id="digitalStamp">
+                        <div class="stamp-outer">
+                            <div class="stamp-inner"></div>
+                            <div class="stamp-content">
+                                <div class="stamp-status">PREVIEW</div>
+                                <div class="stamp-authority" id="stampAuthority">METAFORGE</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Authority Stamp</div>
+                </div>
+            </section>
+
+            <div class="footer-message">
+                <div class="message-text">Generated via MetaForge Engine</div>
+            </div>
         </div>
     </div>
 
