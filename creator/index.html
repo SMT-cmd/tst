@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>METAFORGE ENGINE | Professional Document System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;700;900&family=Roboto+Mono:wght@400;500;700&family=Dancing+Script:wght@400;700&family=Cinzel:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700;900&family=Oswald:wght@300;400;500;700&family=Raleway:wght@300;400;500;700;900&family=Bebas+Neue&family=Lora:wght@400;500;700&family=Inter:wght@300;400;500;700;900&family=Sora:wght@300;400;500;700;800&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#FF6B00">
+    <style>
+        .auth-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
+            z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .auth-modal.show { display: flex; }
+        .auth-box { background: #1a1a2e; padding: 40px; border-radius: 20px; border: 1px solid var(--primary); width: 100%; max-width: 420px; text-align: center; }
+        .auth-box h2 { font-family: 'Orbitron', sans-serif; margin-bottom: 10px; font-size: 24px; color: var(--primary); }
+        .auth-box p { color: #888; margin-bottom: 30px; font-size: 14px; }
+
+        :root { --primary: #FF6B00; --secondary: #1A1A1A; --dark: #0F0F0F; --light: #F5F5F5; --gray: #4A4A4A; --accent: #00D4FF; }
+        * { box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0f0f0f 100%); color: white; font-family: 'Rajdhani', sans-serif; margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; padding: 30px 20px; background: linear-gradient(135deg, rgba(255,107,0,0.1) 0%, transparent 100%); border-bottom: 2px solid rgba(255,107,0,0.3); margin-bottom: 30px; position: relative;}
+        h1 { font-family: 'Orbitron', sans-serif; font-size: clamp(28px, 5vw, 48px); letter-spacing: 6px; background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; margin: 0 0 10px 0; }
+        .subtitle { color: #888; font-size: 14px; letter-spacing: 2px; }
+        
+        .main-grid { display: grid; grid-template-columns: 400px 1fr; gap: 25px; }
+
+        /* Responsive Overhaul */
+        @media (max-width: 1200px) { 
+            .main-grid { grid-template-columns: 1fr; } 
+            .container { padding: 10px; }
+            .preview-panel { position: relative; top: 0; margin-top: 30px; }
+        }
+        @media (max-width: 768px) {
+            header { padding: 20px 10px; margin-bottom: 20px; }
+            h1 { font-size: 24px; letter-spacing: 2px; }
+            .form-tab { padding: 12px 5px; font-size: 9px; }
+            .form-content { padding: 15px; }
+            .input-row, .input-row-3 { grid-template-columns: 1fr; }
+            .color-section { grid-template-columns: 1fr; }
+            .preview-container { padding: 10px; overflow-x: hidden; }
+            .preview-header-bar { flex-direction: column; gap: 10px; align-items: stretch; text-align: center; }
+            .preview-actions { justify-content: center; }
+            .btn-generate { padding: 15px; font-size: 12px; }
+        }
+
+        .form-panel { background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; }
+        .form-tabs { display: flex; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+        .form-tab { flex: 1; padding: 15px 8px; text-align: center; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; transition: all 0.3s; border-bottom: 3px solid transparent; }
+        .form-tab:hover { background: rgba(255,107,0,0.1); }
+        .form-tab.active { border-bottom-color: var(--primary); background: rgba(255,107,0,0.15); color: var(--primary); }
+        .form-content { padding: 20px; overflow-y: auto; flex: 1; }
+        .form-section { display: none; }
+        .form-section.active { display: block; }
+        .section-title { font-family: 'Orbitron', sans-serif; font-size: 11px; color: var(--primary); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 10px; }
+        .section-title::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,107,0,0.5), transparent); }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; color: #aaa; font-weight: 500; }
+        input, select, textarea { width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white; font-family: 'Rajdhani', sans-serif; font-size: 13px; outline: none; transition: all 0.3s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); background: rgba(0,0,0,0.6); box-shadow: 0 0 15px rgba(255,107,0,0.2); }
+        .input-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .color-section { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+        .color-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        input[type="color"] { height: 45px; padding: 3px; cursor: pointer; border-radius: 8px; }
+        .color-presets { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 8px; }
+        .color-dot { width: 100%; aspect-ratio: 1; border-radius: 5px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+        .color-dot:hover { transform: scale(1.15); }
+        .color-dot.active { border-color: white; box-shadow: 0 0 8px currentColor; }
+        
+        .template-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+        .template-card { background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+        .template-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,107,0,0.2); }
+        .template-card.active { border-color: var(--primary); background: rgba(255,107,0,0.1); }
+        .template-card.active::after { content: "✓"; position: absolute; top: 4px; right: 6px; background: var(--primary); color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+        .template-preview-mini { height: 50px; background: white; border-radius: 5px; margin-bottom: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 7px; color: #333; position: relative; overflow: hidden; }
+        .template-name { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .typo-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
+        .typo-option { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .typo-option:hover { border-color: var(--primary); }
+        .typo-option.active { border-color: var(--primary); background: rgba(255,107,0,0.1); }
+        .typo-sample { font-size: 14px; margin-bottom: 4px; }
+        .typo-name { font-size: 8px; color: #888; text-transform: uppercase; }
+        
+        .logo-style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .logo-style-opt { padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; text-align: center; font-size: 10px; transition: all 0.2s; }
+        .logo-style-opt:hover { border-color: var(--primary); }
+        .logo-style-opt.active { border-color: var(--primary); background: rgba(255,107,0,0.15); }
+        
+        .preview-panel { position: sticky; top: 20px; }
+        .preview-header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 10px; }
+        .preview-title { font-family: 'Orbitron', sans-serif; font-size: 14px; color: var(--primary); }
+        .preview-actions { display: flex; gap: 10px; }
+        .preview-btn { padding: 8px 15px; background: rgba(255,107,0,0.2); border: 1px solid var(--primary); border-radius: 6px; color: var(--primary); font-family: 'Orbitron', sans-serif; font-size: 10px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .preview-btn:hover { background: var(--primary); color: white; }
+        .preview-container { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); overflow: auto; max-height: 85vh; display: flex; justify-content: center; }
+        
+        /* SCALING FIX FOR PORTRAIT SCREENS */
+        .preview-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .a4-preview { 
+            width: 210mm; 
+            min-height: 297mm; 
+            background: white; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5); 
+            position: relative; 
+            overflow: hidden; 
+            transform-origin: top center;
+            transform: scale(0.85); /* Default scale */
+            margin-bottom: -30mm;
+        }
+
+        @media (max-width: 1500px) { .a4-preview { transform: scale(0.75); margin-bottom: -70mm; } }
+        @media (max-width: 1200px) { .a4-preview { transform: scale(1.0); margin-bottom: 0; } } /* Resets because panels stack */
+        @media (max-width: 900px) { .a4-preview { transform: scale(0.70); margin-bottom: -80mm; } }
+        @media (max-width: 600px) { .a4-preview { transform: scale(0.45); margin-bottom: -160mm; } }
+        @media (max-width: 400px) { .a4-preview { transform: scale(0.35); margin-bottom: -190mm; } }
+        
+        .btn-generate { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); color: white; border: none; border-radius: 12px; font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 3px; margin-top: 20px; transition: all 0.3s; box-shadow: 0 10px 30px rgba(255, 107, 0, 0.3); }
+        .btn-generate:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255, 107, 0, 0.5); }
+        
+        .result-area { margin-top: 20px; padding: 20px; background: rgba(40, 167, 69, 0.1); border: 1px dashed #28a745; border-radius: 12px; display: none; }
+        .result-area.show { display: block; }
+        .result-title { color: #28a745; font-family: 'Orbitron', sans-serif; font-size: 13px; margin-bottom: 15px; text-align: center; }
+        .share-link-box { background: rgba(0,0,0,0.4); border-radius: 8px; padding: 12px; margin-bottom: 15px; border: 1px solid var(--accent); }
+        .share-link { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--accent); word-break: break-all; }
+        .copy-btn { width: 100%; padding: 10px; background: var(--primary); border: none; border-radius: 6px; color: white; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
+        
+        /* EXACT PRESERVATION OF YOUR TEMPLATE CSS */
+        .receipt-container { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; position: relative; display: flex; flex-direction: column; color: #1a1a1a; font-size: 12px; }
+        .page-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-family: 'Orbitron', sans-serif; font-size: 80px; font-weight: 900; color: rgba(0,0,0,0.04); white-space: nowrap; pointer-events: none; z-index: 0; user-select: none; text-transform: uppercase; letter-spacing: 8px; }
+        .security-layer { position: absolute; inset: 0; background-image: radial-gradient(circle, var(--tpl-primary, #FF6B00) 0.5px, transparent 0.5px); background-size: 25px 25px; opacity: 0.03; pointer-events: none; z-index: 1; }
+        .receipt-header { padding: 25px 35px; position: relative; z-index: 2; flex-shrink: 0; }
+        .header-content { display: flex; justify-content: space-between; align-items: flex-start; }
+        .brand-name { font-size: 28px; font-weight: 900; letter-spacing: 2px; }
+        .brand-tagline { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px; opacity: 0.8; }
+        .brand-contact { font-size: 10px; line-height: 1.6; margin-top: 10px; }
+        .brand-contact strong { margin-right: 5px; }
+        .doc-type-badge { padding: 12px 25px; font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 3px; text-align: center; }
+        .info-section { padding: 20px 35px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 2; flex-shrink: 0; }
+        .info-block { display: flex; flex-direction: column; gap: 4px; }
+        .info-block.full-width { grid-column: 1 / -1; }
+        .info-label { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+        .info-value { font-size: 13px; font-weight: 600; padding: 8px 12px; background: rgba(0,0,0,0.03); border-radius: 6px; border: 1px dashed rgba(0,0,0,0.1); }
+        .items-section { padding: 20px 35px; flex: 1; position: relative; z-index: 2; }
+        .section-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .section-line { flex: 1; height: 2px; }
+        .section-title { font-family: 'Orbitron', sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; }
+        .items-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .items-table th { padding: 12px 10px; text-align: left; font-family: 'Orbitron', sans-serif; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .items-table td { padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.1); vertical-align: top; }
+        .items-table tr:nth-child(even) { background: rgba(0,0,0,0.02); }
+        .bottom-section { padding: 0 35px 20px; display: grid; grid-template-columns: 1fr 280px; gap: 25px; position: relative; z-index: 2; flex-shrink: 0; }
+        .words-box { padding: 15px; border-radius: 0 8px 8px 0; }
+        .words-label { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-bottom: 5px; }
+        .words-value { font-size: 13px; font-weight: 600; font-style: italic; }
+        .totals-box { width: 100%; border-radius: 8px; padding: 15px; }
+        .total-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.1); font-size: 12px; }
+        .total-row:last-child { border-bottom: none; border-top: 3px solid; margin-top: 8px; padding-top: 10px; }
+        .total-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+        .total-value { font-family: 'Roboto Mono', monospace; font-size: 13px; font-weight: 600; }
+        .total-value.grand { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 800; }
+        .signature-section { padding: 0 35px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; position: relative; z-index: 2; flex-shrink: 0; }
+        .signature-box { border-top: 2px solid; padding-top: 10px; position: relative; }
+        .signature-line { height: 35px; border-bottom: 1px dashed #ccc; margin-bottom: 8px; }
+        .signature-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+        .digital-stamp { position: absolute; top: -30px; right: 10px; width: 120px; height: 120px; transform: rotate(-15deg); opacity: 0.9; z-index: 10; pointer-events: none; }
+        .stamp-outer { position: absolute; inset: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.95); box-shadow: 0 0 0 3px rgba(0,0,0,0.05), 0 0 15px rgba(0,0,0,0.1); }
+        .stamp-inner { position: absolute; inset: 5px; border-radius: 50%; border-style: dashed; }
+        .stamp-watermark { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.04; font-family: 'Orbitron', sans-serif; font-size: 35px; font-weight: 900; transform: rotate(-15deg); }
+        .stamp-content { position: relative; z-index: 10; text-align: center; padding: 6px; }
+        .stamp-star { font-size: 8px; margin-bottom: 2px; letter-spacing: 2px; }
+        .stamp-status { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; margin: 2px 0; }
+        .stamp-divider { width: 70%; height: 2px; margin: 3px auto; }
+        .stamp-date { font-family: 'Roboto Mono', monospace; font-size: 8px; font-weight: 700; }
+        .stamp-time { font-family: 'Roboto Mono', monospace; font-size: 7px; }
+        .stamp-authority { font-size: 7px; margin-top: 3px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; font-family: 'Orbitron', sans-serif; }
+        .footer-message { text-align: center; padding: 15px 35px; position: relative; z-index: 2; flex-shrink: 0; }
+        .message-text { font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+        .receipt-footer { padding: 15px 35px; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; flex-shrink: 0; margin-top: auto; }
+        
+        .tpl-modern-tech { font-family: 'Rajdhani', sans-serif; }
+        .tpl-modern-tech .receipt-header { background: var(--tpl-secondary, #1A1A1A); color: white; }
+        .tpl-modern-tech .header-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .brand-name span { color: var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .doc-type-badge { background: var(--tpl-primary, #FF6B00); color: white; transform: rotate(-3deg); box-shadow: 0 10px 30px rgba(255,107,0,0.4); }
+        .tpl-modern-tech .info-section { background: #f5f5f5; border-bottom: 3px solid var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .section-line { background: linear-gradient(to right, var(--tpl-primary, #FF6B00), transparent); }
+        .tpl-modern-tech .items-table th { background: var(--tpl-secondary, #1A1A1A); color: white; }
+        .tpl-modern-tech .words-box { background: rgba(255,107,0,0.05); border-left: 4px solid var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .totals-box { background: #f5f5f5; border: 2px solid var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .total-row:last-child { border-color: var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .total-value.grand { color: var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .signature-box { border-color: var(--tpl-secondary, #1A1A1A); }
+        .tpl-modern-tech .stamp-outer { border: 3px solid var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .stamp-inner { border-color: var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .stamp-status { color: var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .stamp-divider { background: linear-gradient(to right, transparent, var(--tpl-primary, #FF6B00), transparent); }
+        .tpl-modern-tech .footer-message { background: #f5f5f5; border-top: 3px solid var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .message-text { color: var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .receipt-footer { background: var(--tpl-secondary, #1A1A1A); color: white; }
+        
+        .tpl-minimalist-pro { font-family: 'Inter', sans-serif; }
+        .tpl-minimalist-pro .receipt-header { background: white; color: var(--tpl-secondary, #1A1A1A); border-bottom: 1px solid #eee; }
+        .tpl-minimalist-pro .brand-name { font-weight: 300; letter-spacing: 8px; }
+        .tpl-minimalist-pro .doc-type-badge { border: 1px solid var(--tpl-primary, #FF6B00); color: var(--tpl-primary, #FF6B00); font-weight: 500; }
+        .tpl-minimalist-pro .info-section { background: white; }
+        .tpl-minimalist-pro .items-table th { border-bottom: 2px solid var(--tpl-secondary, #1A1A1A); background: transparent; color: var(--tpl-secondary, #1A1A1A); }
+        .tpl-minimalist-pro .words-box { background: rgba(0,0,0,0.02); border-left: 3px solid var(--tpl-secondary, #1A1A1A); }
+        .tpl-minimalist-pro .totals-box { background: white; border: 1px solid #eee; }
+        .tpl-minimalist-pro .total-value.grand { color: var(--tpl-primary, #FF6B00); font-weight: 300; }
+        .tpl-minimalist-pro .signature-box { border-color: #ddd; }
+        .tpl-minimalist-pro .stamp-outer { border: 2px solid var(--tpl-primary, #FF6B00); }
+        .tpl-minimalist-pro .footer-message { border-top: 1px solid #eee; }
+        .tpl-minimalist-pro .message-text { color: var(--tpl-secondary, #1A1A1A); font-weight: 400; }
+        
+        .tpl-corporate-luxe { font-family: 'Playfair Display', serif; background: linear-gradient(135deg, #fff 0%, #fafafa 100%); border: 8px solid var(--tpl-primary, #D4AF37); }
+        .tpl-corporate-luxe .receipt-header { background: white; border-bottom: 2px double var(--tpl-primary, #D4AF37); }
+        .tpl-corporate-luxe .brand-name { font-style: italic; }
+        .tpl-corporate-luxe .doc-type-badge { background: var(--tpl-primary, #D4AF37); color: white; font-family: 'Inter', sans-serif; }
+        .tpl-corporate-luxe .items-table th { background: var(--tpl-secondary, #1A1A1A); color: var(--tpl-primary, #D4AF37); font-family: 'Inter', sans-serif; }
+        .tpl-corporate-luxe .totals-box { background: rgba(212,175,55,0.1); border: 1px solid var(--tpl-primary, #D4AF37); }
+        .tpl-corporate-luxe .total-value.grand { color: var(--tpl-primary, #D4AF37); }
+        .tpl-corporate-luxe .stamp-outer { border: 3px solid var(--tpl-primary, #D4AF37); }
+        .tpl-corporate-luxe .stamp-status { color: var(--tpl-primary, #D4AF37); }
+        .tpl-corporate-luxe .footer-message { border-top: 1px solid var(--tpl-primary, #D4AF37); }
+        .tpl-corporate-luxe .message-text { color: var(--tpl-primary, #D4AF37); }
+        
+        .tpl-cyber-punk { font-family: 'Orbitron', monospace; background: #000; color: var(--tpl-primary, #00FF41); border: 2px solid var(--tpl-primary, #00FF41); box-shadow: inset 0 0 30px rgba(0,255,65,0.3); }
+        .tpl-cyber-punk .receipt-header { background: #000; border-bottom: 1px solid var(--tpl-primary, #00FF41); }
+        .tpl-cyber-punk .brand-name { text-shadow: 0 0 10px var(--tpl-primary, #00FF41); }
+        .tpl-cyber-punk .doc-type-badge { border: 1px solid var(--tpl-primary, #00FF41); box-shadow: 0 0 15px var(--tpl-primary, #00FF41); background: transparent; color: var(--tpl-primary, #00FF41); }
+        .tpl-cyber-punk .info-section { background: rgba(0,255,65,0.05); }
+        .tpl-cyber-punk .items-table th { background: var(--tpl-primary, #00FF41); color: #000; }
+        .tpl-cyber-punk .items-table td { border-bottom: 1px solid rgba(0,255,65,0.3); }
+        .tpl-cyber-punk .totals-box { border: 1px solid var(--tpl-primary, #00FF41); background: rgba(0,255,65,0.05); }
+        .tpl-cyber-punk .total-value.grand { text-shadow: 0 0 20px var(--tpl-primary, #00FF41); color: var(--tpl-primary, #00FF41); }
+        .tpl-cyber-punk .stamp-outer { border: 3px solid var(--tpl-primary, #00FF41); background: #000; }
+        .tpl-cyber-punk .stamp-status { color: var(--tpl-primary, #00FF41); text-shadow: 0 0 10px var(--tpl-primary, #00FF41); }
+        .tpl-cyber-punk .footer-message { border-top: 1px solid var(--tpl-primary, #00FF41); }
+        
+        .tpl-royal-elegance { font-family: 'Cinzel', serif; background: linear-gradient(135deg, #FFFDF5 0%, #FFF8E7 100%); border: 4px double var(--tpl-primary, #8B4513); }
+        .tpl-royal-elegance .receipt-header { border-bottom: 1px solid var(--tpl-primary, #8B4513); text-align: center; }
+        .tpl-royal-elegance .header-content { flex-direction: column; align-items: center; }
+        .tpl-royal-elegance .brand-name { letter-spacing: 4px; }
+        .tpl-royal-elegance .doc-type-badge { border: 2px solid var(--tpl-primary, #8B4513); margin-top: 15px; background: transparent; color: var(--tpl-primary, #8B4513); }
+        .tpl-royal-elegance .items-table th { background: var(--tpl-secondary, #2C1810); color: var(--tpl-primary, #D4AF37); }
+        .tpl-royal-elegance .totals-box { border-top: 2px solid var(--tpl-primary, #8B4513); border-bottom: 2px solid var(--tpl-primary, #8B4513); text-align: center; background: transparent; }
+        .tpl-royal-elegance .total-value.grand { color: var(--tpl-primary, #8B4513); }
+        .tpl-royal-elegance .stamp-outer { border: 3px solid var(--tpl-primary, #8B4513); }
+        .tpl-royal-elegance .stamp-status { color: var(--tpl-primary, #8B4513); }
+        
+        .tpl-clean-air { font-family: 'Poppins', sans-serif; background: #fff; border-radius: 30px; }
+        .tpl-clean-air .receipt-header { background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); border-radius: 20px; margin: 20px; padding: 20px; }
+        .tpl-clean-air .doc-type-badge { background: var(--tpl-primary, #4299e1); color: white; border-radius: 50px; }
+        .tpl-clean-air .items-table { border-spacing: 0 8px; border-collapse: separate; }
+        .tpl-clean-air .items-table th { background: transparent; color: #4a5568; }
+        .tpl-clean-air .items-table td { background: #f7fafc; border-radius: 8px; border: none; }
+        .tpl-clean-air .totals-box { background: linear-gradient(135deg, var(--tpl-primary, #4299e1) 0%, var(--tpl-secondary, #1a365d) 100%); color: white; }
+        .tpl-clean-air .stamp-outer { border: 3px solid var(--tpl-primary, #4299e1); }
+        
+        .tpl-midnight-special { font-family: 'Space Grotesk', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; border-radius: 15px; }
+        .tpl-midnight-special .receipt-header { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tpl-midnight-special .doc-type-badge { background: var(--tpl-primary, #e94560); color: white; border-radius: 8px; }
+        .tpl-midnight-special .items-table th { background: rgba(255,255,255,0.1); color: var(--tpl-primary, #e94560); }
+        .tpl-midnight-special .items-table td { border-bottom: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.9); }
+        .tpl-midnight-special .totals-box { background: rgba(233,69,96,0.1); border-radius: 10px; }
+        .tpl-midnight-special .total-value.grand { color: var(--tpl-primary, #e94560); }
+        .tpl-midnight-special .stamp-outer { border: 3px solid var(--tpl-primary, #e94560); background: rgba(26,26,46,0.95); }
+        .tpl-midnight-special .stamp-status { color: var(--tpl-primary, #e94560); }
+        
+        .tpl-compact-slip { font-family: 'Roboto Mono', monospace; background: #fff; width: 85%; margin: 0 auto; border: 1px dashed #ccc; font-size: 10px; }
+        .tpl-compact-slip .receipt-header { text-align: center; padding: 15px; }
+        .tpl-compact-slip .brand-name { font-size: 18px; }
+        .tpl-compact-slip .items-table { font-size: 9px; }
+        .tpl-compact-slip .items-table th, .tpl-compact-slip .items-table td { padding: 5px; border-bottom: 1px dotted #ccc; }
+        .tpl-compact-slip .totals-box { text-align: center; border-top: 2px solid #000; }
+        
+        .tpl-bold-stripe { font-family: 'Oswald', sans-serif; background: #fff; padding: 0; }
+        .tpl-bold-stripe .receipt-header { background: var(--tpl-primary, #FF6B00); color: white; padding: 30px; }
+        .tpl-bold-stripe .doc-type-badge { float: right; background: white; color: var(--tpl-primary, #FF6B00); }
+        .tpl-bold-stripe .info-section { background: var(--tpl-secondary, #1A1A1A); color: white; }
+        .tpl-bold-stripe .items-table { margin: 20px; width: calc(100% - 40px); }
+        .tpl-bold-stripe .items-table th { background: var(--tpl-secondary, #1A1A1A); color: white; }
+        .tpl-bold-stripe .totals-section { grid-column: 1 / -1; }
+        .tpl-bold-stripe .totals-box { background: var(--tpl-primary, #FF6B00); color: white; border-radius: 0; }
+        .tpl-bold-stripe .receipt-footer { background: var(--tpl-secondary, #1A1A1A); color: white; }
+        
+        .tpl-art-deco { font-family: 'Cinzel', serif; background: linear-gradient(135deg, #f5f5dc 0%, #faf0e6 100%); border: 3px solid var(--tpl-primary, #C9A961); position: relative; }
+        .tpl-art-deco::before, .tpl-art-deco::after { content: "◆"; position: absolute; font-size: 20px; color: var(--tpl-primary, #C9A961); z-index: 5; }
+        .tpl-art-deco::before { top: 10px; left: 10px; }
+        .tpl-art-deco::after { bottom: 10px; right: 10px; }
+        .tpl-art-deco .receipt-header { text-align: center; }
+        .tpl-art-deco .header-content { flex-direction: column; align-items: center; }
+        .tpl-art-deco .brand-name { letter-spacing: 5px; }
+        .tpl-art-deco .doc-type-badge { border: 2px solid var(--tpl-primary, #C9A961); letter-spacing: 4px; background: transparent; color: var(--tpl-secondary, #1a1a1a); }
+        .tpl-art-deco .items-table th { background: var(--tpl-secondary, #2C2C2C); color: var(--tpl-primary, #C9A961); letter-spacing: 2px; }
+        .tpl-art-deco .totals-box { border: 2px solid var(--tpl-primary, #C9A961); text-align: center; background: transparent; }
+        .tpl-art-deco .total-value.grand { color: var(--tpl-primary, #C9A961); }
+        
+        .tpl-neo-brutalist { font-family: 'Space Grotesk', sans-serif; background: #fff; border: 4px solid #000; box-shadow: 8px 8px 0 #000; }
+        .tpl-neo-brutalist .receipt-header { border-bottom: 4px solid #000; }
+        .tpl-neo-brutalist .brand-name { text-transform: uppercase; }
+        .tpl-neo-brutalist .doc-type-badge { background: var(--tpl-primary, #FF006E); color: white; border: 3px solid #000; box-shadow: 4px 4px 0 #000; }
+        .tpl-neo-brutalist .items-table { border: 3px solid #000; }
+        .tpl-neo-brutalist .items-table th { background: #000; color: white; }
+        .tpl-neo-brutalist .items-table td { border-bottom: 2px solid #000; }
+        .tpl-neo-brutalist .totals-box { background: var(--tpl-primary, #FF006E); color: white; border: 3px solid #000; box-shadow: 4px 4px 0 #000; }
+        .tpl-neo-brutalist .stamp-outer { border: 4px solid #000; box-shadow: 4px 4px 0 #000; }
+        
+        .tpl-japanese-minimal { font-family: 'Inter', sans-serif; background: #fafafa; }
+        .tpl-japanese-minimal .receipt-header { padding-bottom: 30px; }
+        .tpl-japanese-minimal .header-content { align-items: flex-start; }
+        .tpl-japanese-minimal .brand-block { writing-mode: vertical-rl; text-orientation: mixed; margin-right: 30px; }
+        .tpl-japanese-minimal .brand-name { letter-spacing: 8px; }
+        .tpl-japanese-minimal .doc-info { flex: 1; text-align: right; }
+        .tpl-japanese-minimal .doc-type-badge { font-size: 48px; font-weight: 100; color: var(--tpl-primary, #E74C3C); opacity: 0.3; background: transparent; transform: none; box-shadow: none; }
+        .tpl-japanese-minimal .items-table th { border-bottom: 1px solid #000; background: transparent; font-weight: 400; color: #000; }
+        .tpl-japanese-minimal .totals-section { text-align: right; }
+        .tpl-japanese-minimal .total-value.grand { color: var(--tpl-primary, #E74C3C); font-weight: 100; }
+        
+        .tpl-swiss-design { font-family: 'Inter', sans-serif; background: #fff; display: flex; flex-direction: row; }
+        .tpl-swiss-design .sidebar { background: var(--tpl-primary, #FF0000); color: white; padding: 30px; margin: 0; display: flex; flex-direction: column; justify-content: space-between; min-height: 297mm; width: 180px; }
+        .tpl-swiss-design .sidebar .brand-name { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 18px; }
+        .tpl-swiss-design .sidebar .doc-type-badge { font-size: 36px; font-weight: 900; opacity: 0.2; background: transparent; padding: 0; transform: none; box-shadow: none; }
+        .tpl-swiss-design .main-content { padding: 30px; flex: 1; }
+        .tpl-swiss-design .items-table th { background: #000; color: white; font-size: 8px; }
+        .tpl-swiss-design .totals-section { border-top: 4px solid var(--tpl-primary, #FF0000); padding-top: 20px; }
+        .tpl-swiss-design .total-value.grand { color: var(--tpl-primary, #FF0000); }
+        
+        .tpl-retro-wave { font-family: 'Orbitron', sans-serif; background: linear-gradient(180deg, #2d1b4e 0%, #1a0b2e 100%); color: #fff; position: relative; overflow: hidden; }
+        .tpl-retro-wave::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff); }
+        .tpl-retro-wave .receipt-header { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tpl-retro-wave .brand-name { text-shadow: 0 0 20px #ff00ff; }
+        .tpl-retro-wave .doc-type-badge { background: linear-gradient(90deg, #ff00ff, #00ffff); color: #000; }
+        .tpl-retro-wave .items-table th { background: rgba(255,0,255,0.2); color: #00ffff; }
+        .tpl-retro-wave .items-table td { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tpl-retro-wave .totals-box { background: rgba(0,255,255,0.1); border: 1px solid #00ffff; }
+        .tpl-retro-wave .total-value.grand { background: linear-gradient(90deg, #ff00ff, #00ffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .tpl-nature-organic { font-family: 'Lora', serif; background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%); border: 2px solid var(--tpl-primary, #558B2F); }
+        .tpl-nature-organic .receipt-header { text-align: center; }
+        .tpl-nature-organic .header-content { flex-direction: column; align-items: center; }
+        .tpl-nature-organic .brand-name { color: var(--tpl-secondary, #33691E); }
+        .tpl-nature-organic .doc-type-badge { background: var(--tpl-primary, #558B2F); color: white; font-family: 'Poppins', sans-serif; letter-spacing: 2px; }
+        .tpl-nature-organic .items-table th { background: var(--tpl-primary, #558B2F); color: white; font-family: 'Poppins', sans-serif; }
+        .tpl-nature-organic .items-table td { border-bottom: 1px solid #c5e1a5; }
+        .tpl-nature-organic .totals-box { background: rgba(85,139,47,0.1); border-radius: 10px; }
+        .tpl-nature-organic .total-value.grand { color: var(--tpl-primary, #558B2F); }
+        
+        .tpl-pharmacy-medical { font-family: 'Inter', sans-serif; background: #fff; border: 3px solid var(--tpl-primary, #0066CC); }
+        .tpl-pharmacy-medical .receipt-header { border-bottom: 2px solid var(--tpl-primary, #0066CC); }
+        .tpl-pharmacy-medical .brand-section { display: flex; align-items: center; gap: 15px; }
+        .tpl-pharmacy-medical .cross-icon { width: 40px; height: 40px; background: var(--tpl-primary, #0066CC); position: relative; }
+        .tpl-pharmacy-medical .cross-icon::before, .tpl-pharmacy-medical .cross-icon::after { content: ""; position: absolute; background: white; }
+        .tpl-pharmacy-medical .cross-icon::before { width: 60%; height: 20%; top: 40%; left: 20%; }
+        .tpl-pharmacy-medical .cross-icon::after { width: 20%; height: 60%; top: 20%; left: 40%; }
+        .tpl-pharmacy-medical .brand-name { color: var(--tpl-primary, #0066CC); }
+        .tpl-pharmacy-medical .doc-type-badge { background: var(--tpl-primary, #0066CC); color: white; }
+        .tpl-pharmacy-medical .items-table th { background: var(--tpl-primary, #0066CC); color: white; }
+        .tpl-pharmacy-medical .items-table td { border-bottom: 1px solid #e3f2fd; }
+        .tpl-pharmacy-medical .totals-box { background: #e3f2fd; border-left: 4px solid var(--tpl-primary, #0066CC); }
+        .tpl-pharmacy-medical .total-value.grand { color: var(--tpl-primary, #0066CC); }
+        
+        .tpl-bakery-sweet { font-family: 'Dancing Script', cursive; background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%); border: 3px dashed var(--tpl-primary, #FF6B9D); position: relative; }
+        .tpl-bakery-sweet::before { content: "🧁"; position: absolute; top: 10px; right: 20px; font-size: 40px; opacity: 0.3; z-index: 5; }
+        .tpl-bakery-sweet .receipt-header { text-align: center; }
+        .tpl-bakery-sweet .header-content { flex-direction: column; align-items: center; }
+        .tpl-bakery-sweet .brand-name { font-size: 36px; color: var(--tpl-primary, #FF6B9D); }
+        .tpl-bakery-sweet .doc-type-badge { background: var(--tpl-primary, #FF6B9D); color: white; font-family: 'Poppins', sans-serif; border-radius: 20px; }
+        .tpl-bakery-sweet .items-table { font-family: 'Poppins', sans-serif; }
+        .tpl-bakery-sweet .items-table th { background: var(--tpl-primary, #FF6B9D); color: white; }
+        .tpl-bakery-sweet .items-table td { border-bottom: 1px solid #ffcdd2; }
+        .tpl-bakery-sweet .totals-box { background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(255,107,157,0.2); }
+        .tpl-bakery-sweet .total-value.grand { color: var(--tpl-primary, #FF6B9D); }
+        
+        .tpl-fashion-boutique { font-family: 'Raleway', sans-serif; background: #fff; position: relative; }
+        .tpl-fashion-boutique::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: linear-gradient(90deg, var(--tpl-primary, #000), var(--tpl-secondary, #333), var(--tpl-primary, #000)); }
+        .tpl-fashion-boutique .receipt-header { text-align: center; padding-top: 40px; }
+        .tpl-fashion-boutique .header-content { flex-direction: column; align-items: center; }
+        .tpl-fashion-boutique .brand-name { font-weight: 300; letter-spacing: 12px; text-transform: uppercase; }
+        .tpl-fashion-boutique .doc-type-badge { border: 1px solid #000; letter-spacing: 4px; font-weight: 400; background: transparent; color: #000; }
+        .tpl-fashion-boutique .items-table th { border-bottom: 1px solid #000; background: transparent; color: #000; font-weight: 500; letter-spacing: 2px; }
+        .tpl-fashion-boutique .items-table td { border-bottom: 1px solid #eee; padding: 15px 10px; }
+        .tpl-fashion-boutique .totals-section { text-align: right; }
+        .tpl-fashion-boutique .total-value.grand { font-weight: 300; }
+        
+        .tpl-startup-modern { font-family: 'Sora', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px; }
+        .tpl-startup-modern .receipt-header { padding-bottom: 25px; }
+        .tpl-startup-modern .doc-type-badge { background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 50px; }
+        .tpl-startup-modern .items-table { border-spacing: 0 8px; border-collapse: separate; }
+        .tpl-startup-modern .items-table th { background: rgba(255,255,255,0.1); }
+        .tpl-startup-modern .items-table td { background: rgba(255,255,255,0.05); border: none; }
+        .tpl-startup-modern .totals-box { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 15px; }
+        
+        .tpl-construction-industrial { font-family: 'Oswald', sans-serif; background: #f4f4f4; border: 5px solid var(--tpl-primary, #F4A460); }
+        .tpl-construction-industrial .receipt-header { background: var(--tpl-secondary, #8B4513); color: white; padding: 30px; border-bottom: 5px solid var(--tpl-primary, #F4A460); }
+        .tpl-construction-industrial .brand-name { text-transform: uppercase; letter-spacing: 4px; }
+        .tpl-construction-industrial .doc-type-badge { background: var(--tpl-primary, #F4A460); color: #000; clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%); padding: 15px 40px; }
+        .tpl-construction-industrial .items-table th { background: var(--tpl-secondary, #8B4513); color: white; text-transform: uppercase; }
+        .tpl-construction-industrial .totals-box { background: var(--tpl-primary, #F4A460); color: #000; }
+        .tpl-construction-industrial .receipt-footer { background: var(--tpl-secondary, #8B4513); color: white; }
+        
+        .tpl-salon-beauty { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #ffeef8 0%, #ffe0f0 100%); border: 3px solid var(--tpl-primary, #FF69B4); }
+        .tpl-salon-beauty .receipt-header { text-align: center; background: var(--tpl-primary, #FF69B4); color: white; padding: 25px; }
+        .tpl-salon-beauty .header-content { flex-direction: column; align-items: center; }
+        .tpl-salon-beauty .brand-name { font-family: 'Dancing Script', cursive; font-size: 36px; }
+        .tpl-salon-beauty .doc-type-badge { background: white; color: var(--tpl-primary, #FF69B4); border-radius: 30px; }
+        .tpl-salon-beauty .items-table th { background: var(--tpl-primary, #FF69B4); color: white; }
+        .tpl-salon-beauty .totals-box { background: white; border: 2px solid var(--tpl-primary, #FF69B4); border-radius: 15px; }
+        .tpl-salon-beauty .total-value.grand { color: var(--tpl-primary, #FF69B4); }
+        
+        .tpl-restaurant-diner { font-family: 'Lora', serif; background: #fff; border: 4px dotted var(--tpl-primary, #D2691E); }
+        .tpl-restaurant-diner .receipt-header { text-align: center; padding: 25px; border-bottom: 2px dashed var(--tpl-primary, #D2691E); }
+        .tpl-restaurant-diner .header-content { flex-direction: column; align-items: center; }
+        .tpl-restaurant-diner .brand-name { font-family: 'Playfair Display', serif; font-size: 32px; font-style: italic; }
+        .tpl-restaurant-diner .doc-type-badge { background: var(--tpl-primary, #D2691E); color: white; font-family: 'Oswald', sans-serif; }
+        .tpl-restaurant-diner .items-table th { background: var(--tpl-primary, #D2691E); color: white; }
+        .tpl-restaurant-diner .items-table td { border-bottom: 1px dashed #ddd; }
+        .tpl-restaurant-diner .totals-box { background: #fff8f0; border: 2px solid var(--tpl-primary, #D2691E); }
+        .tpl-restaurant-diner .total-value.grand { color: var(--tpl-primary, #D2691E); }
+        
+        .tpl-education-academy { font-family: 'Inter', sans-serif; background: #fff; border: 3px solid var(--tpl-primary, #4169E1); }
+        .tpl-education-academy .receipt-header { background: var(--tpl-primary, #4169E1); color: white; padding: 25px; }
+        .tpl-education-academy .doc-type-badge { background: white; color: var(--tpl-primary, #4169E1); border-radius: 8px; }
+        .tpl-education-academy .items-table th { background: var(--tpl-primary, #4169E1); color: white; }
+        .tpl-education-academy .items-table td { border-bottom: 1px solid #e0e8ff; }
+        .tpl-education-academy .totals-box { background: #f0f4ff; border-left: 5px solid var(--tpl-primary, #4169E1); }
+        .tpl-education-academy .total-value.grand { color: var(--tpl-primary, #4169E1); }
+        
+        .tpl-transport-logistics { font-family: 'Rajdhani', sans-serif; background: #fff; border: 3px solid var(--tpl-secondary, #2F4F4F); }
+        .tpl-transport-logistics .receipt-header { background: var(--tpl-secondary, #2F4F4F); color: white; padding: 25px; border-bottom: 5px solid var(--tpl-primary, #FFD700); }
+        .tpl-transport-logistics .brand-name { text-transform: uppercase; }
+        .tpl-transport-logistics .doc-type-badge { background: var(--tpl-primary, #FFD700); color: #000; }
+        .tpl-transport-logistics .items-table th { background: var(--tpl-secondary, #2F4F4F); color: white; }
+        .tpl-transport-logistics .totals-box { background: var(--tpl-primary, #FFD700); color: #000; }
+        
+        .tpl-real-estate { font-family: 'Cinzel', serif; background: #fff; border: 4px double var(--tpl-primary, #8B4513); }
+        .tpl-real-estate .receipt-header { text-align: center; padding: 30px; }
+        .tpl-real-estate .header-content { flex-direction: column; align-items: center; }
+        .tpl-real-estate .brand-name { font-size: 26px; letter-spacing: 5px; }
+        .tpl-real-estate .doc-type-badge { border: 3px solid var(--tpl-primary, #8B4513); background: transparent; color: var(--tpl-primary, #8B4513); }
+        .tpl-real-estate .items-table th { background: var(--tpl-primary, #8B4513); color: white; }
+        .tpl-real-estate .totals-box { border: 2px solid var(--tpl-primary, #8B4513); background: #fffaf0; }
+        .tpl-real-estate .total-value.grand { color: var(--tpl-primary, #8B4513); }
+        
+        .tpl-event-planning { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 100%); border: 3px solid var(--tpl-primary, #FF1493); }
+        .tpl-event-planning .receipt-header { text-align: center; background: var(--tpl-primary, #FF1493); color: white; clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%); padding-bottom: 40px; }
+        .tpl-event-planning .header-content { flex-direction: column; align-items: center; }
+        .tpl-event-planning .brand-name { font-family: 'Dancing Script', cursive; font-size: 38px; }
+        .tpl-event-planning .doc-type-badge { background: white; color: var(--tpl-primary, #FF1493); border-radius: 25px; margin-top: 10px; }
+        .tpl-event-planning .items-table th { background: var(--tpl-primary, #FF1493); color: white; }
+        .tpl-event-planning .totals-box { background: white; border: 2px solid var(--tpl-primary, #FF1493); border-radius: 15px; box-shadow: 0 5px 20px rgba(255,20,147,0.2); }
+        .tpl-event-planning .total-value.grand { color: var(--tpl-primary, #FF1493); }
+        
+        .tpl-curved-organic { font-family: 'Poppins', sans-serif; background: #fff; border-radius: 40px; }
+        .tpl-curved-organic .receipt-header { display: flex; flex-direction: column; align-items: center; text-align: center; padding-bottom: 30px; border-bottom: 2px dashed #eee; background: transparent; color: #1a1a1a; }
+        .tpl-curved-organic .header-content { flex-direction: column; align-items: center; }
+        .tpl-curved-organic .doc-type-badge { background: var(--tpl-primary, #FF6B00); color: white; border-radius: 50px; margin-top: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .tpl-curved-organic .info-section { background: #f9f9f9; border-radius: 25px; margin: 30px; border: none; }
+        .tpl-curved-organic .items-table { border-spacing: 0 15px; border-collapse: separate; }
+        .tpl-curved-organic .items-table th { background: transparent; color: #999; }
+        .tpl-curved-organic .items-table td { background: white; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: none; }
+        .tpl-curved-organic .totals-box { background: var(--tpl-secondary, #1A1A1A); border-radius: 30px; color: white; border: none; }
+        .tpl-curved-organic .total-label { color: rgba(255,255,255,0.7); }
+        .tpl-curved-organic .total-value { color: white; }
+        .tpl-curved-organic .total-value.grand { color: var(--tpl-primary, #FF6B00); font-size: 24px; }
+        .tpl-curved-organic .receipt-footer { background: #fff; color: #888; border-top: 1px solid #eee; }
+        
+        .tpl-geometric-slice { font-family: 'Space Grotesk', sans-serif; background: #fff; border: 2px solid #000; }
+        .tpl-geometric-slice .receipt-header { background: #000; color: white; padding: 60px 40px; clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%); min-height: 220px; }
+        .tpl-geometric-slice .doc-type-badge { font-size: 60px; font-weight: 900; opacity: 0.1; background: transparent; position: absolute; top: 10px; right: 20px; transform: none; box-shadow: none; }
+        .tpl-geometric-slice .info-section { background: white; border-bottom: 4px solid #000; margin-top: -30px; }
+        .tpl-geometric-slice .items-table th { border: 2px solid #000; background: var(--tpl-primary, #FF6B00); color: #000; }
+        .tpl-geometric-slice .items-table td { border: 2px solid #000; }
+        .tpl-geometric-slice .totals-box { border: 4px solid #000; border-radius: 0; background: #fff; display: grid; grid-template-columns: 1fr; gap: 0; padding: 0; }
+        .tpl-geometric-slice .total-row { padding: 10px 15px; border-bottom: 2px solid #000; }
+        .tpl-geometric-slice .total-row:last-child { background: #000; color: white; border-top: none; margin-top: 0; }
+        .tpl-geometric-slice .total-value.grand { color: var(--tpl-primary, #FF6B00); }
+        .tpl-geometric-slice .receipt-footer { background: #f0f0f0; border-top: 2px solid #000; }
+        
+        .tpl-vintage-ticket { font-family: 'Roboto Mono', monospace; background: #fef9e7; border: 2px solid #d4c4a8; }
+        .tpl-vintage-ticket::before, .tpl-vintage-ticket::after { content: ""; position: absolute; width: 40px; height: 40px; background: #f5f5f5; border-radius: 50%; top: 50%; margin-top: -20px; border: 2px solid #d4c4a8; z-index: 10; }
+        .tpl-vintage-ticket::before { left: -22px; }
+        .tpl-vintage-ticket::after { right: -22px; }
+        .tpl-vintage-ticket .receipt-header { text-align: center; border-bottom: 2px dashed #d4c4a8; background: transparent; color: #7d6b5d; }
+        .tpl-vintage-ticket .header-content { flex-direction: column; align-items: center; }
+        .tpl-vintage-ticket .brand-name { border: 2px solid var(--tpl-primary, #7d6b5d); color: var(--tpl-primary, #7d6b5d); padding: 10px 20px; display: inline-block; }
+        .tpl-vintage-ticket .doc-type-badge { background: transparent; color: #a69076; font-size: 14px; letter-spacing: 5px; box-shadow: none; margin-top: 15px; transform: none; }
+        .tpl-vintage-ticket .info-section { background: transparent; border-bottom: 1px solid #d4c4a8; }
+        .tpl-vintage-ticket .items-table th { background: transparent; color: #a69076; border-bottom: 1px solid #d4c4a8; }
+        .tpl-vintage-ticket .items-table td { border-bottom: 1px dotted #d4c4a8; }
+        .tpl-vintage-ticket .totals-box { border: none; background: transparent; border-top: 2px dashed #d4c4a8; border-radius: 0; }
+        .tpl-vintage-ticket .total-row { border-bottom: 1px dashed #d4c4a8; }
+        .tpl-vintage-ticket .total-row:last-child { border-top: 2px dashed #d4c4a8; margin-top: 15px; }
+        .tpl-vintage-ticket .total-value.grand { font-size: 28px; text-decoration: underline double; color: #c0392b; }
+        .tpl-vintage-ticket .receipt-footer { background: #fef9e7; color: #a69076; border-top: 2px dashed #d4c4a8; }
+        
+        .tpl-futuristic-glass { font-family: 'Rajdhani', sans-serif; background: linear-gradient(135deg, #121212 0%, #1e1e1e 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+        .tpl-futuristic-glass .receipt-header { background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tpl-futuristic-glass .brand-name { color: var(--tpl-primary, #FF6B00); text-shadow: 0 0 15px var(--tpl-primary, #FF6B00); }
+        .tpl-futuristic-glass .doc-type-badge { background: rgba(255,255,255,0.05); border: 1px solid var(--tpl-primary, #FF6B00); color: white; transform: none; box-shadow: 0 0 10px var(--tpl-primary, #FF6B00); }
+        .tpl-futuristic-glass .info-section { background: transparent; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tpl-futuristic-glass .items-table th { background: rgba(255,255,255,0.05); color: var(--tpl-primary, #FF6B00); }
+        .tpl-futuristic-glass .items-table td { border-bottom: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+        .tpl-futuristic-glass .totals-box { background: linear-gradient(135deg, var(--tpl-primary, #FF6B00), var(--tpl-secondary, #1A1A1A)); border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .tpl-futuristic-glass .total-label, .tpl-futuristic-glass .total-value { color: white; }
+        .tpl-futuristic-glass .receipt-footer { background: #121212; border-top: 1px solid rgba(255,255,255,0.1); color: #888; }
+        
+        .tpl-stamp-quality { font-family: 'Cinzel', serif; background: #fff; border: 15px solid #f0f0f0; }
+        .tpl-stamp-quality::after { content: "CERTIFIED"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 120px; color: var(--tpl-primary, #FF6B00); opacity: 0.03; font-weight: 900; pointer-events: none; }
+        .tpl-stamp-quality .receipt-header { text-align: center; background: transparent; color: #1a1a1a; border-bottom: none; }
+        .tpl-stamp-quality .header-content { flex-direction: column; align-items: center; }
+        .tpl-stamp-quality .brand-name { letter-spacing: 5px; }
+        .tpl-stamp-quality .doc-type-badge { border-top: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a; background: transparent; color: #1a1a1a; transform: none; box-shadow: none; letter-spacing: 10px; border-radius: 0; width: auto; padding: 10px 50px; }
+        .tpl-stamp-quality .info-section { background: transparent; border-bottom: 1px solid #eee; }
+        .tpl-stamp-quality .items-table th { border-bottom: 2px solid #1a1a1a; background: transparent; color: #1a1a1a; }
+        .tpl-stamp-quality .totals-box { border: 4px double var(--tpl-primary, #FF6B00); background: transparent; }
+        .tpl-stamp-quality .total-value.grand { color: var(--tpl-primary, #FF6B00); }
+        .tpl-stamp-quality .receipt-footer { background: #fff; color: #aaa; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="security-tag" data-security="true" data-timestamp="" data-signature="METAFORGE-ENGINE-v4.0-SECURE"></div>
+    
+    <div class="container">
+        <header>
+            <div style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px;">
+                <button class="preview-btn" id="adminBtn" style="display: none; background: var(--secondary); border-color: var(--secondary); color: white;" onclick="window.location.href='../admin.html'">Admin Dashboard</button>
+                <button class="preview-btn" id="logoutBtn" style="display: none;" onclick="handleLogout()">Logout</button>
+            </div>
+            <h1>METAFORGE ENGINE</h1>
+            <p class="subtitle">30 Professional Templates | Shareable Links | Full-Featured Engine Generator</p>
+        </header>
+
+        <div class="main-grid">
+            <div class="form-panel">
+                <div class="form-tabs">
+                    <div class="form-tab active" onclick="switchTab('identity')">Identity</div>
+                    <div class="form-tab" onclick="switchTab('templates')">Templates</div>
+                    <div class="form-tab" onclick="switchTab('typography')">Typography</div>
+                    <div class="form-tab" onclick="switchTab('colors')">Colors</div>
+                    <div class="form-tab" onclick="switchTab('deploy')">🚀 Deploy</div>
+                </div>
+
+                <div class="form-content">
+                    <div class="form-section active" id="tab-identity">
+                        <div class="section-title">Business Information</div>
+                        <div class="input-group"><label>Brand Name</label><input type="text" id="brandName" placeholder="e.g. Tech Solutions Ltd" oninput="updatePreview()"></div>
+                        <div class="input-group"><label>Logo Image URL (Optional)</label><input type="text" id="logoUrl" placeholder="https://example.com/logo.png" oninput="updatePreview()"></div>
+                        <div class="input-group"><label>Tagline / Slogan</label><input type="text" id="tagline" placeholder="e.g. Innovation for Tomorrow" oninput="updatePreview()"></div>
+                        <div class="input-row">
+                            <div class="input-group"><label>Phone</label><input type="text" id="tel" placeholder="+234 814 081 3999" oninput="updatePreview()"></div>
+                            <div class="input-group"><label>RC Number</label><input type="text" id="rcNumber" placeholder="RC 913487" oninput="updatePreview()"></div>
+                            <div class="input-group"><label>TIN Number</label><input type="text" id="tinNumber" placeholder="TIN 12345678-0001" oninput="updatePreview()"></div>
+                        </div>
+                        <div class="input-group"><label>Business Address</label><textarea id="address" rows="2" placeholder="5 Otigba Street, Computer Village, Ikeja, Lagos" oninput="updatePreview()"></textarea></div>
+                        <div class="input-group"><label>Email / Website</label><input type="text" id="email" placeholder="info@yourcompany.com" oninput="updatePreview()"></div>
+                        <div class="section-title" style="margin-top: 20px;">Bank Transfer Details</div>
+                        <div class="input-row">
+                            <div class="input-group"><label>Bank Name</label><input type="text" id="bankName" placeholder="e.g. GTBank" oninput="updatePreview()"></div>
+                            <div class="input-group"><label>Account Name</label><input type="text" id="accName" placeholder="e.g. Tech Solutions Ltd" oninput="updatePreview()"></div>
+                            <div class="input-group"><label>Account Number</label><input type="text" id="accNumber" placeholder="e.g. 0123456789" oninput="updatePreview()"></div>
+                        </div>
+                        <div class="input-group"><label>Other Payment Details</label><textarea id="defaultPayment" rows="2" placeholder="e.g. PayPal, Cash, etc." oninput="updatePreview()"></textarea></div>
+                        <div class="input-group"><label>Terms & Conditions</label><textarea id="defaultTerms" rows="2" placeholder="Goods once sold are not returnable..." oninput="updatePreview()"></textarea></div>
+                        <div class="input-group"><label>Footer Message</label><input type="text" id="footerNote" placeholder="Thank you for your patronage!" oninput="updatePreview()"></div>
+                        
+                        <div class="section-title" style="margin-top: 20px;">Document Settings</div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Document Type</label>
+                                <select id="docType" onchange="updatePreview()">
+                                    <option value="INVOICE">INVOICE</option>
+                                    <option value="RECEIPT">RECEIPT</option>
+                                    <option value="ESTIMATE">ESTIMATE</option>
+                                    <option value="QUOTATION">QUOTATION</option>
+                                    <option value="PROFORMA">PROFORMA INVOICE</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Currency</label>
+                                <select id="currency" onchange="updatePreview()">
+                                    <option value="₦">Naira (₦)</option>
+                                    <option value="$">Dollar ($)</option>
+                                    <option value="€">Euro (€)</option>
+                                    <option value="£">Pound (£)</option>
+                                    <option value="₹">Rupee (₹)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>VAT Rate (%)</label>
+                                <input type="number" id="vatRate" value="7.5" min="0" max="100" step="0.5" oninput="updatePreview()">
+                            </div>
+                            <div class="input-group">
+                                <label>Stamp Status</label>
+                                <select id="stampStatus" onchange="updatePreview()">
+                                    <option value="PAID">PAID</option>
+                                    <option value="APPROVED">APPROVED</option>
+                                    <option value="PROCESSED">PROCESSED</option>
+                                    <option value="VERIFIED">VERIFIED</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" id="tab-templates">
+                        <div class="section-title">Corporate (1-3)</div>
+                        <div class="template-gallery">
+                            <div class="template-card active" data-template="modern-tech" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: linear-gradient(135deg, #fff 50%, #FF6B00 50%);"></div><div class="template-name">Modern Tech</div></div>
+                            <div class="template-card" data-template="minimalist-pro" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff; border: 2px solid #eee;"></div><div class="template-name">Minimalist Pro</div></div>
+                        </div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="corporate-luxe" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: linear-gradient(135deg, #fff, #FFFDF0); border: 2px solid #D4AF37;"></div><div class="template-name">Corporate Luxe</div></div>
+                            <div class="template-card" data-template="legal-professional" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff; border: 2px solid #1a1a1a;"></div><div class="template-name">Legal Pro</div></div>
+                        </div>
+                        
+                        <div class="section-title">Creative/Tech (4-6)</div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="cyber-punk" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #000; border: 1px solid #00FF41;"></div><div class="template-name">Cyber Punk</div></div>
+                            <div class="template-card" data-template="retro-wave" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: linear-gradient(180deg, #2d1b4e, #1a0b2e);"></div><div class="template-name">Retro Wave</div></div>
+                        </div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="neo-brutalist" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff; border: 3px solid #000; box-shadow: 3px 3px 0 #000;"></div><div class="template-name">Neo Brutalist</div></div>
+                            <div class="template-card" data-template="startup-modern" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px;"></div><div class="template-name">Startup Modern</div></div>
+                        </div>
+                        
+                        <div class="section-title">Classic/Elegant (7-9)</div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="royal-elegance" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #FFFDF5; border: 2px double #8B4513;"></div><div class="template-name">Royal Elegance</div></div>
+                            <div class="template-card" data-template="art-deco" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #f5f5dc; border: 2px solid #C9A961;"></div><div class="template-name">Art Deco</div></div>
+                        </div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="fashion-boutique" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff; border-top: 4px solid #000;"></div><div class="template-name">Fashion Boutique</div></div>
+                            <div class="template-card" data-template="hotel-resort" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #f8f4e8; border: 2px solid #B8860B;"></div><div class="template-name">Hotel Resort</div></div>
+                        </div>
+                        
+                        <div class="section-title">Clean/Minimal (10-12)</div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="clean-air" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);"></div><div class="template-name">Clean Air</div></div>
+                            <div class="template-card" data-template="swiss-design" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: linear-gradient(90deg, #FF0000 30%, #fff 30%);"></div><div class="template-name">Swiss Design</div></div>
+                        </div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="japanese-minimal" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fafafa;"></div><div class="template-name">Japanese Minimal</div></div>
+                            <div class="template-card" data-template="compact-slip" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff; border: 1px dashed #ccc; width: 60%; margin: 0 auto;"></div><div class="template-name">Compact Slip</div></div>
+                        </div>
+                        
+                        <div class="section-title">Dark/Bold (13-15)</div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="midnight-special" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: linear-gradient(135deg, #1a1a2e, #16213e);"></div><div class="template-name">Midnight</div></div>
+                            <div class="template-card" data-template="garage-workshop" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #1a1a1a; border: 2px solid #FF6600;"></div><div class="template-name">Garage Workshop</div></div>
+                        </div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="bold-stripe" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: linear-gradient(180deg, #FF6B00 30%, #fff 30%, #fff 70%, #1A1A1A 70%);"></div><div class="template-name">Bold Stripe</div></div>
+                            <div class="template-card" data-template="fitness-gym" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #111; border: 2px solid #00FF00;"></div><div class="template-name">Fitness Gym</div></div>
+                        </div>
+                        
+                        <div class="section-title">Industry Specific (16-20)</div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="pharmacy-medical" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff; border: 2px solid #0066CC;"></div><div class="template-name">Pharmacy</div></div>
+                            <div class="template-card" data-template="bakery-sweet" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff5f5; border: 2px dashed #FF6B9D;"></div><div class="template-name">Bakery Sweet</div></div>
+                        </div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="nature-organic" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #f1f8e9; border: 2px solid #558B2F;"></div><div class="template-name">Nature Organic</div></div>
+                            <div class="template-card" data-template="salon-beauty" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #ffeef8; border: 2px solid #FF69B4;"></div><div class="template-name">Salon Beauty</div></div>
+                        </div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="restaurant-diner" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff; border: 2px dotted #D2691E;"></div><div class="template-name">Restaurant</div></div>
+                            <div class="template-card" data-template="construction-industrial" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #8B4513; border: 3px solid #F4A460;"></div><div class="template-name">Construction</div></div>
+                        </div>
+                        
+                        <div class="section-title">Service Industries (21-25)</div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="education-academy" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #4169E1; border-radius: 5px;"></div><div class="template-name">Education</div></div>
+                            <div class="template-card" data-template="transport-logistics" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #2F4F4F; border-bottom: 4px solid #FFD700;"></div><div class="template-name">Transport</div></div>
+                        </div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="real-estate" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff; border: 2px double #8B4513;"></div><div class="template-name">Real Estate</div></div>
+                            <div class="template-card" data-template="event-planning" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: linear-gradient(135deg, #fff0f5, #FF1493); border-radius: 10px;"></div><div class="template-name">Event Planning</div></div>
+                        </div>
+
+                        <div class="section-title">Unique & Artistic (31-35)</div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="curved-organic" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff; border-radius: 15px; border: 2px solid #eee; overflow: hidden; position: relative;"><div style="position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; background: #FF6B00; border-radius: 50%; opacity: 0.2;"></div></div><div class="template-name">Curved Organic</div><div class="template-category">Soft</div></div>
+                            <div class="template-card" data-template="geometric-slice" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #000; clip-path: polygon(0 0, 100% 0, 100% 60%, 0 100%);"></div><div class="template-name">Geometric Slice</div><div class="template-category">Sharp</div></div>
+                        </div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="vintage-ticket" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fef9e7; border: 1px solid #d4c4a8; position: relative;"><div style="position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 50%; margin-top: -5px; left: -6px; border: 1px solid #d4c4a8;"></div><div style="position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 50%; margin-top: -5px; right: -6px; border: 1px solid #d4c4a8;"></div></div><div class="template-name">Vintage Ticket</div><div class="template-category">Retro</div></div>
+                            <div class="template-card" data-template="futuristic-glass" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #121212; border: 1px solid #FF6B00; box-shadow: inset 0 0 10px rgba(255,107,0,0.2);"></div><div class="template-name">Futuristic Glass</div><div class="template-category">Digital</div></div>
+                        </div>
+                        <div class="template-gallery">
+                            <div class="template-card" data-template="stamp-quality" onclick="selectTemplate(this)"><div class="template-preview-mini" style="background: #fff; border: 4px solid #f0f0f0; display: flex; align-items: center; justify-content: center; font-family: 'Cinzel'; font-size: 6px; font-weight: 900; color: rgba(255,107,0,0.1);">STAMP</div><div class="template-name">Stamp Quality</div><div class="template-category">Premium</div></div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" id="tab-typography">
+                        <div class="section-title">Professional Fonts</div>
+                        <div class="typo-gallery">
+                            <div class="typo-option active" data-font="'Rajdhani', sans-serif" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Rajdhani', sans-serif;">Aa</div><div class="typo-name">Rajdhani - Modern</div></div>
+                            <div class="typo-option" data-font="'Inter', sans-serif" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Inter', sans-serif;">Aa</div><div class="typo-name">Inter - Clean</div></div>
+                            <div class="typo-option" data-font="'Poppins', sans-serif" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Poppins', sans-serif;">Aa</div><div class="typo-name">Poppins - Friendly</div></div>
+                            <div class="typo-option" data-font="'Montserrat', sans-serif" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Montserrat', sans-serif;">Aa</div><div class="typo-name">Montserrat - Geometric</div></div>
+                        </div>
+                        <div class="section-title">Display Fonts</div>
+                        <div class="typo-gallery">
+                            <div class="typo-option" data-font="'Orbitron', sans-serif" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Orbitron', sans-serif;">Aa</div><div class="typo-name">Orbitron - Cyber</div></div>
+                            <div class="typo-option" data-font="'Oswald', sans-serif" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Oswald', sans-serif;">Aa</div><div class="typo-name">Oswald - Bold</div></div>
+                            <div class="typo-option" data-font="'Bebas Neue', sans-serif" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Bebas Neue', sans-serif;">Aa</div><div class="typo-name">Bebas - Impact</div></div>
+                            <div class="typo-option" data-font="'Space Grotesk', sans-serif" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Space Grotesk', sans-serif;">Aa</div><div class="typo-name">Space Grotesk</div></div>
+                        </div>
+                        <div class="section-title">Elegant Fonts</div>
+                        <div class="typo-gallery">
+                            <div class="typo-option" data-font="'Playfair Display', serif" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Playfair Display', serif;">Aa</div><div class="typo-name">Playfair - Luxury</div></div>
+                            <div class="typo-option" data-font="'Cinzel', serif" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Cinzel', serif;">Aa</div><div class="typo-name">Cinzel - Royal</div></div>
+                            <div class="typo-option" data-font="'Lora', serif" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Lora', serif;">Aa</div><div class="typo-name">Lora - Classic</div></div>
+                            <div class="typo-option" data-font="'Dancing Script', cursive" onclick="selectFont(this)"><div class="typo-sample" style="font-family: 'Dancing Script', cursive;">Aa</div><div class="typo-name">Dancing Script</div></div>
+                        </div>
+                        
+                        <div class="section-title" style="margin-top: 20px;">Logo Style</div>
+                        <div class="logo-style-grid">
+                            <div class="logo-style-opt active" data-style="split" onclick="selectLogoStyle(this)">Split</div>
+                            <div class="logo-style-opt" data-style="underline" onclick="selectLogoStyle(this)">Underline</div>
+                            <div class="logo-style-opt" data-style="boxed" onclick="selectLogoStyle(this)">Boxed</div>
+                            <div class="logo-style-opt" data-style="modern" onclick="selectLogoStyle(this)">Modern</div>
+                            <div class="logo-style-opt" data-style="gradient" onclick="selectLogoStyle(this)">Gradient</div>
+                            <div class="logo-style-opt" data-style="outline" onclick="selectLogoStyle(this)">Outline</div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" id="tab-colors">
+                        <div class="color-section">
+                            <div class="color-box">
+                                <label>Primary Color</label>
+                                <input type="color" id="primaryColor" value="#FF6B00" oninput="updatePreview()">
+                                <div class="color-presets" id="primaryPresets"></div>
+                            </div>
+                            <div class="color-box">
+                                <label>Secondary Color</label>
+                                <input type="color" id="secondaryColor" value="#1A1A1A" oninput="updatePreview()">
+                                <div class="color-presets" id="secondaryPresets"></div>
+                            </div>
+                        </div>
+                        <div class="section-title">Quick Themes</div>
+                        <div class="template-gallery">
+                            <div class="template-card" onclick="applyTheme('#FF6B00', '#1A1A1A')"><div class="template-preview-mini" style="background: linear-gradient(135deg, #FF6B00, #1A1A1A);"></div><div class="template-name">Orange Dark</div></div>
+                            <div class="template-card" onclick="applyTheme('#0066CC', '#FFFFFF')"><div class="template-preview-mini" style="background: linear-gradient(135deg, #0066CC, #fff);"></div><div class="template-name">Blue White</div></div>
+                            <div class="template-card" onclick="applyTheme('#D4AF37', '#1A1A1A')"><div class="template-preview-mini" style="background: linear-gradient(135deg, #D4AF37, #1A1A1A);"></div><div class="template-name">Gold Black</div></div>
+                            <div class="template-card" onclick="applyTheme('#E63946', '#F1FAEE')"><div class="template-preview-mini" style="background: linear-gradient(135deg, #E63946, #F1FAEE);"></div><div class="template-name">Red Cream</div></div>
+                        </div>
+                        <div class="template-gallery">
+                            <div class="template-card" onclick="applyTheme('#2A9D8F', '#264653')"><div class="template-preview-mini" style="background: linear-gradient(135deg, #2A9D8F, #264653);"></div><div class="template-name">Teal Dark</div></div>
+                            <div class="template-card" onclick="applyTheme('#9B5DE5', '#00BBF9')"><div class="template-preview-mini" style="background: linear-gradient(135deg, #9B5DE5, #00BBF9);"></div><div class="template-name">Purple Blue</div></div>
+                            <div class="template-card" onclick="applyTheme('#FF1493', '#FFF0F5')"><div class="template-preview-mini" style="background: linear-gradient(135deg, #FF1493, #FFF0F5);"></div><div class="template-name">Pink Light</div></div>
+                            <div class="template-card" onclick="applyTheme('#00FF00', '#111111')"><div class="template-preview-mini" style="background: linear-gradient(135deg, #00FF00, #111);"></div><div class="template-name">Neon Green</div></div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" id="tab-deploy">
+                        <div class="section-title">Cloud Deployment</div>
+                        <div style="background: rgba(255,107,0,0.1); padding: 15px; border-radius: 10px; border: 1px solid var(--primary); margin-bottom: 20px;">
+                            <p style="font-size: 11px; line-height: 1.5;">Click Generate to build the unique database connection and URL.</p>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                        <button class="btn-generate" id="btnGenLink" style="margin-top: 0; background: linear-gradient(135deg, #00c853, #64dd17);" onclick="generateEngine('link')">🔗 GENERATE SECURE ENGINE LINK</button>
+                        <button class="btn-generate" id="btnGenFile" style="margin-top: 0;" onclick="generateEngine('file')">🚀 GENERATE ENGINE FILE</button>
+                    </div>
+                    
+                    <div class="result-area" id="resultArea">
+                        <div class="result-title">✓ ENGINE & UNIQUE LINK CREATED</div>
+                        <p style="font-size: 11px; color: #888; text-align: center; margin-bottom: 15px;">Your branded receipt engine and unique shareable link are ready!</p>
+                        
+                        <div class="share-link-box" style="border: 2px solid var(--accent);">
+                            <div style="font-size: 9px; color: var(--accent); text-transform: uppercase; margin-bottom: 5px; font-weight: 900;">🚀 YOUR UNIQUE HOSTED LINK (GitHub Pages Compatible)</div>
+                            <div class="share-link" id="shareLink" style="font-size: 12px; font-weight: 700;"></div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                            <button class="copy-btn" onclick="copyShareLink()">📋 Copy Full Link</button>
+                        </div>
+                        <button class="copy-btn" onclick="openGeneratedEngine()" style="background: #28a745; margin-bottom: 10px;">🌐 Open Engine in New Tab</button>
+                        
+                        <div class="template-export">
+                            <div class="export-header">
+                                <span class="export-title">Generated HTML Code</span>
+                                <button class="export-btn" onclick="copyTemplate()">Copy</button>
+                            </div>
+                            <div class="export-code" id="templateCode"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-panel">
+                <div class="preview-header-bar">
+                    <span class="preview-title">LIVE PREVIEW (A4)</span>
+                    <div class="preview-actions">
+                        <button class="preview-btn" onclick="printReceipt()">🖨️ Print</button>
+                        <button class="preview-btn" onclick="downloadPreview()">💾 Save</button>
+                    </div>
+                </div>
+                <div class="preview-container">
+                    <div class="preview-wrapper">
+                        <div class="a4-preview" id="a4Preview">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="authModal" class="auth-modal show">
+        <div class="auth-container" style="background: #1a1a2e; padding: 40px; border-radius: 20px; border: 1px solid var(--primary); max-width: 400px; width: 100%;">
+            <div class="auth-title" style="font-family: 'Orbitron'; color: var(--primary); font-size: 20px; text-align: center; margin-bottom: 20px;">Creator Login</div>
+            <p style="color: #888; text-align: center; margin-top: -10px; margin-bottom: 25px; font-size: 13px;">Authorized Personnel Only</p>
+            <div id="authForm">
+                <div class="input-group">
+                    <label style="color: #aaa; margin-bottom: 5px;">Email Address</label>
+                    <input type="email" id="authEmail" placeholder="admin@metaforge.com" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: white;">
+                </div>
+                <div class="input-group" style="margin-top: 15px;">
+                    <label style="color: #aaa; margin-bottom: 5px;">Password</label>
+                    <input type="password" id="authPassword" placeholder="••••••••" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #000; color: white;">
+                </div>
+                <button class="btn-generate" style="margin-top: 20px;" onclick="handleAuth()">Sign In</button>
+            </div>
+            <div id="authLoading" style="display: none; text-align: center; color: var(--primary); margin-top: 20px;">
+                <p>Verifying Credentials...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAElgJBP-F322zoJ-T1qeE48s2ka0EcEvw", 
+            authDomain: "metaforge-6afdf.firebaseapp.com", 
+            projectId: "metaforge-6afdf", 
+            storageBucket: "metaforge-6afdf.firebasestorage.app", 
+            messagingSenderId: "261172077627", 
+            appId: "1:261172077627:web:cb3cec74be2dbcb1d6281e"
+        }; 
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        let currentUser = null;
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('authModal').classList.remove('show');
+                document.getElementById('logoutBtn').style.display = 'block';
+                document.getElementById('adminBtn').style.display = 'block';
+            } else {
+                document.getElementById('authModal').classList.add('show');
+                document.getElementById('logoutBtn').style.display = 'none';
+                document.getElementById('adminBtn').style.display = 'none';
+            }
+        });
+
+        window.handleAuth = async function() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            if (!email || !password) return alert("Email and password are required.");
+
+            document.getElementById('authForm').style.display = 'none';
+            document.getElementById('authLoading').style.display = 'block';
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.error(error);
+                alert("Login failed. Please check your credentials.");
+            } finally {
+                document.getElementById('authForm').style.display = 'block';
+                document.getElementById('authLoading').style.display = 'none';
+            }
+        };
+
+        window.handleLogout = async function() {
+            if (confirm("Are you sure you want to logout?")) {
+                await signOut(auth);
+            }
+        };
+
+        // Robust Unicode Base64 Encoding
+        function encodeData(obj) {
+            const jsonStr = JSON.stringify(obj);
+            const utf8Bytes = new TextEncoder().encode(jsonStr);
+            let binary = "";
+            for (let i = 0; i < utf8Bytes.byteLength; i++) { 
+                binary += String.fromCharCode(utf8Bytes[i]); 
+            }
+            return btoa(binary);
+        }
+
+        window.generateEngine = async function(type = 'link') {
+            if (!currentUser && type === 'link') return alert("You must be logged in to generate a secure link.");
+            
+            const btnId = type === 'link' ? 'btnGenLink' : 'btnGenFile';
+            const btn = document.getElementById(btnId);
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Generating...";
+            btn.disabled = true;
+            
+            const brandName = document.getElementById('brandName').value || 'Brand';
+            const config = {
+                bn: brandName,
+                lu: document.getElementById('logoUrl').value,
+                tg: document.getElementById('tagline').value,
+                ph: document.getElementById('tel').value,
+                rc: document.getElementById('rcNumber').value,
+                tn: document.getElementById('tinNumber').value,
+                ad: document.getElementById('address').value,
+                em: document.getElementById('email').value,
+                bk: document.getElementById('bankName').value,
+                an: document.getElementById('accName').value,
+                ac: document.getElementById('accNumber').value,
+                dp: document.getElementById('defaultPayment').value,
+                dt: document.getElementById('defaultTerms').value,
+                fn: document.getElementById('footerNote').value,
+                dtp: document.getElementById('docType').value,
+                cy: document.getElementById('currency').value,
+                pc: document.getElementById('primaryColor').value,
+                sc: document.getElementById('secondaryColor').value,
+                vr: document.getElementById('vatRate').value,
+                ss: document.getElementById('stampStatus').value,
+                ff: window.currentFont || "'Rajdhani', sans-serif",
+                tp: window.currentTemplate || "modern-tech",
+                ls: window.currentLogoStyle || "split",
+                ts: Date.now(),
+                version: '4.0-SECURE'
+            };
+
+            const encodedConfig = encodeData(config);
+            const brandSlug = brandName.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 15);
+            
+            // Build the long URL (Points to the engine folder)
+            const currentUrl = window.location.href.split('#')[0];
+            const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/creator')) + '/engine/';
+            const longUrl = baseUrl + '#' + brandSlug + '_' + encodedConfig;
+
+            try {
+                if (type === 'link') {
+                    // Fetch the auth token to pass to the secure cloud function
+                    const idToken = await currentUser.getIdToken();
+                    
+                    // Fetch the shortened URL using relative path for firebase.json
+                    const response = await fetch('/shorten', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
+                        },
+                        body: JSON.stringify({ 
+                            url: longUrl,
+                            brandName: brandName,
+                            config: encodedConfig
+                        })
+                    });
+
+                    if (!response.ok) throw new Error("Failed to secure link with backend.");
+                    const data = await response.json();
+                    
+                    window.generatedEngineURL = data.shortUrl;
+                    document.getElementById('shareLink').textContent = data.shortUrl;
+                    document.getElementById('resultArea').classList.add('show');
+                } else if (type === 'file') {
+                    const engineHTML = generateFullEngineHTML(config);
+                    const blob = new Blob([engineHTML], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${brandSlug}-engine.html`;
+                    a.click();
+                    document.getElementById('resultArea').classList.add('show');
+                }
+                
+                // Save to localStorage so preview persists
+                localStorage.setItem('meta_receipt_engine_config', JSON.stringify(config));
+
+                btn.innerHTML = "✅ SUCCESS!";
+                setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+            } catch (err) {
+                console.error("Generation failed:", err);
+                alert("Generation Error: " + err.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+    </script>
+
+    <script>
+        // ===== CONFIGURATION =====
+        const colorPresets = ['#FF6B00', '#E63946', '#1D3557', '#2A9D8F', '#D4AF37', '#E9C46A', '#800020', '#4A4A4A', '#1A1A1A', '#5D3FD3', '#000080', '#008080', '#FFC0CB', '#8B4513', '#C0C0C0', '#FF006E', '#8338EC', '#3A86FF', '#06FFA5', '#FFBE0B', '#FF1493', '#00FF00', '#FFD700', '#8B0000', '#4169E1', '#FF69B4', '#D2691E', '#F4A460', '#B8860B', '#2F4F4F'];
+        
+        window.currentTemplate = 'modern-tech';
+        window.currentFont = "'Rajdhani', sans-serif";
+        window.currentLogoStyle = 'split';
+
+        // ===== INITIALIZATION =====
+        function init() {
+            initColorPresets();
+            loadFromURL();
+            updatePreview();
+        }
+
+        function initColorPresets() {
+            const pCont = document.getElementById('primaryPresets');
+            const sCont = document.getElementById('secondaryPresets');
+            colorPresets.forEach(color => {
+                pCont.appendChild(createColorDot(color, 'primary'));
+                sCont.appendChild(createColorDot(color, 'secondary'));
+            });
+        }
+
+        function createColorDot(color, type) {
+            const dot = document.createElement('div');
+            dot.className = 'color-dot';
+            dot.style.backgroundColor = color;
+            dot.onclick = () => { document.getElementById(type + 'Color').value = color; updatePreview(); };
+            return dot;
+        }
+
+        // ===== TAB SWITCHING =====
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        // ===== SELECTION FUNCTIONS =====
+        window.selectTemplate = function(el) {
+            document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            window.currentTemplate = el.dataset.template;
+            updatePreview();
+        }
+
+        window.selectFont = function(el) {
+            document.querySelectorAll('.typo-option').forEach(o => o.classList.remove('active'));
+            el.classList.add('active');
+            window.currentFont = el.dataset.font;
+            updatePreview();
+        }
+
+        window.selectLogoStyle = function(el) {
+            document.querySelectorAll('.logo-style-opt').forEach(o => o.classList.remove('active'));
+            el.classList.add('active');
+            window.currentLogoStyle = el.dataset.style;
+            updatePreview();
+        }
+
+        window.applyTheme = function(primary, secondary) {
+            document.getElementById('primaryColor').value = primary;
+            document.getElementById('secondaryColor').value = secondary;
+            updatePreview();
+        }
+
+        // ===== LOGO FORMATTING =====
+        function formatLogo(name, primary, secondary) {
+            const words = name.split(' ');
+            switch(window.currentLogoStyle) {
+                case 'split': return words.map((word, i) => i === 0 ? word : `<span style="color:${primary}">${word}</span>`).join(' ');
+                case 'underline': return `<span style="border-bottom: 4px solid ${primary}; padding-bottom: 2px;">${name}</span>`;
+                case 'boxed': return `<span style="background: ${primary}; color: ${getContrastColor(primary)}; padding: 5px 15px;">${name}</span>`;
+                case 'modern': return `${name}<span style="color:${primary}">.</span>`;
+                case 'gradient': return `<span style="background: linear-gradient(45deg, ${primary}, ${secondary}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${name}</span>`;
+                case 'outline': return `<span style="-webkit-text-stroke: 1.5px ${primary}; color: transparent;">${name}</span>`;
+                default: return name;
+            }
+        }
+
+        function getContrastColor(hexcolor) {
+            if (!hexcolor) return '#000000';
+            if (hexcolor.slice(0, 1) === '#') hexcolor = hexcolor.slice(1);
+            if (hexcolor.length === 3) hexcolor = hexcolor.split('').map(h => h + h).join('');
+            const r = parseInt(hexcolor.substr(0, 2), 16);
+            const g = parseInt(hexcolor.substr(2, 2), 16);
+            const b = parseInt(hexcolor.substr(4, 2), 16);
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return (yiq >= 128) ? '#000000' : '#FFFFFF';
+        }
+
+        // ===== PREVIEW UPDATE =====
+        window.updatePreview = function() {
+            const brandName = document.getElementById('brandName').value || 'YOUR BRAND';
+            const tagline = document.getElementById('tagline').value || 'Your Tagline Here';
+            const logoUrl = document.getElementById('logoUrl').value;
+            const tel = document.getElementById('tel').value || '+234 000 000 0000';
+            const rc = document.getElementById('rcNumber').value || 'RC XXXXXX';
+            const tin = document.getElementById('tinNumber').value;
+            const address = document.getElementById('address').value || 'Your Business Address';
+            const email = document.getElementById('email').value || 'email@yourcompany.com';
+            
+            const bName = document.getElementById('bankName').value;
+            const aNum = document.getElementById('accNumber').value;
+            let paymentHtml = '';
+            if (bName && aNum) {
+                paymentHtml += `BANK: ${bName} | ACC NO: ${aNum}\n`;
+            }
+            paymentHtml += document.getElementById('defaultPayment').value || 'Payment Details Here';
+            
+            const terms = document.getElementById('defaultTerms').value || 'Goods once sold are not returnable.';
+            const footer = document.getElementById('footerNote').value || 'Thank you for your patronage!';
+            const docType = document.getElementById('docType').value || 'INVOICE';
+            const currency = document.getElementById('currency').value || '₦';
+            const primary = document.getElementById('primaryColor').value || '#FF6B00';
+            const secondary = document.getElementById('secondaryColor').value || '#1A1A1A';
+            const stampStatus = document.getElementById('stampStatus').value || 'PAID';
+
+            const logoDisplay = logoUrl ? `<img src="${logoUrl}" style="max-height: 50px; max-width: 150px; object-fit: contain;">` : formatLogo(brandName, primary, secondary);
+            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0];
+
+            const isSwiss = window.currentTemplate === 'swiss-design';
+            const sidebarHtml = isSwiss ? `
+                <div class="sidebar">
+                    <div class="brand-name">${brandName}</div>
+                    <div class="doc-type-badge">${docType}</div>
+                </div>
+            ` : '';
+
+            const preview = document.getElementById('a4Preview');
+            preview.className = 'a4-preview receipt-container tpl-' + window.currentTemplate;
+            preview.style.setProperty('--tpl-primary', primary);
+            preview.style.setProperty('--tpl-secondary', secondary);
+            preview.style.fontFamily = window.currentFont;
+
+            const headerHtml = isSwiss ? '' : `
+                <header class="receipt-header">
+                    <div class="header-content">
+                        <div class="brand-block">
+                            <div class="brand-name">${logoDisplay}</div>
+                            <div class="brand-tagline">${tagline}</div>
+                            <div class="brand-contact">
+                                <div><strong>RC:</strong> ${rc}</div>
+                                ${tin ? `<div><strong>TIN:</strong> ${tin}</div>` : ''}
+                                <div><strong>Address:</strong> ${address}</div>
+                                <div><strong>Tel:</strong> ${tel}</div>
+                            </div>
+                        </div>
+                        <div class="doc-type-badge">${docType}</div>
+                    </div>
+                    ${window.currentTemplate !== 'swiss-design' && window.currentTemplate !== 'bold-stripe' ? '<div class="header-accent"></div>' : ''}
+                </header>
+            `;
+
+            const mainContentHtml = isSwiss ? '<div class="main-content">' : '';
+            const mainContentCloseHtml = isSwiss ? '</div>' : '';
+
+            const infoHtml = `
+                <section class="info-section">
+                    <div class="info-block full-width">
+                        <div class="info-label">Client / Customer Name</div>
+                        <div class="info-value">Sample Customer Name</div>
+                    </div>
+                    <div class="info-block">
+                        <div class="info-label">Address</div>
+                        <div class="info-value">Customer Address</div>
+                    </div>
+                    <div class="info-block">
+                        <div class="info-label">Date</div>
+                        <div class="info-value">${today}</div>
+                    </div>
+                </section>
+            `;
+
+            const itemsHtml = `
+                <section class="items-section">
+                    <div class="section-header">
+                        <div class="section-line"></div>
+                        <div class="section-title">Items</div>
+                        <div class="section-line" style="background: linear-gradient(to left, ${primary}, transparent);"></div>
+                    </div>
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>S/N</th>
+                                <th>Description</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="text-align: center; font-weight: 700;">1</td>
+                                <td>Sample Product or Service Item</td>
+                                <td style="text-align: center;">2</td>
+                                <td style="text-align: right;">${currency}25,000.00</td>
+                                <td style="text-align: right;">${currency}50,000.00</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; font-weight: 700;">2</td>
+                                <td>Additional Service Charge</td>
+                                <td style="text-align: center;">1</td>
+                                <td style="text-align: right;">${currency}10,000.00</td>
+                                <td style="text-align: right;">${currency}10,000.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            `;
+
+            const bottomHtml = `
+                <div class="bottom-section">
+                    <div class="words-section">
+                        <div class="words-box">
+                            <div class="words-label">Amount in Words</div>
+                            <div class="words-value">Sixty Thousand Naira Only</div>
+                        </div>
+                    </div>
+                    <div class="totals-section">
+                        <div class="totals-box">
+                            <div class="total-row">
+                                <span class="total-label">Subtotal</span>
+                                <span class="total-value">${currency}60,000.00</span>
+                            </div>
+                            <div class="total-row">
+                                <span class="total-label">VAT (7.5%)</span>
+                                <span class="total-value">${currency}4,500.00</span>
+                            </div>
+                            <div class="total-row">
+                                <span class="total-label">TOTAL</span>
+                                <span class="total-value grand">${currency}64,500.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const signatureHtml = `
+                <section class="signature-section">
+                    <div class="signature-box">
+                        <div class="signature-line"></div>
+                        <div class="signature-label">Customer's Signature</div>
+                    </div>
+                    <div class="signature-box" style="position: relative;">
+                        <div class="digital-stamp">
+                            <div class="stamp-outer">
+                                <div class="stamp-inner"></div>
+                                <div class="stamp-watermark">✓</div>
+                                <div class="stamp-content">
+                                    <div class="stamp-star">★ ★ ★</div>
+                                    <div class="stamp-status">${stampStatus}</div>
+                                    <div class="stamp-divider"></div>
+                                    <div class="stamp-date">${today}</div>
+                                    <div class="stamp-time">${timeStr}</div>
+                                    <div class="stamp-authority">${brandName}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="signature-line"></div>
+                        <div class="signature-label">Authorized Signature & Stamp</div>
+                    </div>
+                </section>
+            `;
+
+            const footerHtml = `
+                <div class="footer-message">
+                    <div class="message-text">${footer}</div>
+                </div>
+                <footer class="receipt-footer">
+                    <div class="footer-brand">${logoDisplay}</div>
+                    <div class="footer-contact">${rc} | ${address} | ${tel}</div>
+                </footer>
+            `;
+
+            preview.innerHTML = `
+                <div class="page-watermark">${brandName.toUpperCase()}</div>
+                <div class="security-layer"></div>
+                ${sidebarHtml}
+                ${headerHtml}
+                ${mainContentHtml}
+                ${infoHtml}
+                ${itemsHtml}
+                ${bottomHtml}
+                ${signatureHtml}
+                ${footerHtml}
+                ${mainContentCloseHtml}
+                <div class="security-tag" data-template="${window.currentTemplate}" data-brand="${btoa(brandName)}" data-timestamp="${Date.now()}"></div>
+            `;
+
+            if (window.currentTemplate === 'geometric-slice') {
+                const header = preview.querySelector('.receipt-header');
+                if (header) {
+                    header.style.background = secondary;
+                    header.style.color = getContrastColor(secondary);
+                }
+            }
+            if (window.currentTemplate === 'vintage-ticket') {
+                const brand = preview.querySelector('.brand-name');
+                if (brand) {
+                    brand.style.color = primary;
+                    brand.style.borderColor = primary;
+                }
+            }
+            if (window.currentTemplate === 'futuristic-glass') {
+                const docBadge = preview.querySelector('.doc-type-badge');
+                if (docBadge) {
+                    docBadge.style.borderColor = primary;
+                    docBadge.style.boxShadow = `0 0 15px ${primary}`;
+                }
+            }
+        }
+
+        // Function used by File Download to pack everything into one HTML file
+        window.generateFullEngineHTML = function(config) {
+            return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${config.brandName} - Engine</title><script>window.location.href="${window.generatedEngineURL}";<\/script></head><body>Redirecting to secure engine...</body></html>`;
+        };
+
+        function decodeConfigFromURL(encoded) {
+            try {
+                const binary = atob(encoded);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                const json = new TextDecoder().decode(bytes);
+                const compressed = JSON.parse(json);
+                const REVERSE_MAP = {
+                    bn: 'brandName', lu: 'logoUrl', tg: 'tagline', ph: 'tel', rc: 'rcNumber', tn: 'tinNumber',
+                    ad: 'address', em: 'email', bk: 'bankName', an: 'accName', ac: 'accNumber',
+                    dp: 'defaultPayment', dt: 'defaultTerms', fn: 'footerNote', dtp: 'docType',
+                    cy: 'currency', pc: 'primaryColor', sc: 'secondaryColor', vr: 'vatRate',
+                    ss: 'stampStatus', ff: 'fontFamily', tp: 'template', ls: 'logoStyle', ts: 'timestamp'
+                };
+                const config = {};
+                for (let shortKey in compressed) {
+                    const key = REVERSE_MAP[shortKey] || shortKey;
+                    config[key] = compressed[shortKey];
+                }
+                return config;
+            } catch(e) {
+                console.error("Decoding error:", e);
+                return null;
+            }
+        }
+
+        function loadFromURL() {
+            const hash = window.location.hash.slice(1);
+            if (hash) {
+                const parts = hash.split('_');
+                const actualBase64 = parts.length > 1 ? parts[1] : parts[0];
+                const config = decodeConfigFromURL(actualBase64);
+                if (config) {
+                    if (document.getElementById('brandName')) document.getElementById('brandName').value = config.brandName || '';
+                    if (document.getElementById('logoUrl')) document.getElementById('logoUrl').value = config.logoUrl || '';
+                    if (document.getElementById('tagline')) document.getElementById('tagline').value = config.tagline || '';
+                    if (document.getElementById('tel')) document.getElementById('tel').value = config.tel || '';
+                    if (document.getElementById('rcNumber')) document.getElementById('rcNumber').value = config.rcNumber || '';
+                    if (document.getElementById('tinNumber')) document.getElementById('tinNumber').value = config.tinNumber || '';
+                    if (document.getElementById('address')) document.getElementById('address').value = config.address || '';
+                    if (document.getElementById('email')) document.getElementById('email').value = config.email || '';
+                    if (document.getElementById('bankName')) document.getElementById('bankName').value = config.bankName || '';
+                    if (document.getElementById('accName')) document.getElementById('accName').value = config.accName || '';
+                    if (document.getElementById('accNumber')) document.getElementById('accNumber').value = config.accNumber || '';
+                    if (document.getElementById('defaultPayment')) document.getElementById('defaultPayment').value = config.defaultPayment || '';
+                    if (document.getElementById('defaultTerms')) document.getElementById('defaultTerms').value = config.defaultTerms || '';
+                    if (document.getElementById('footerNote')) document.getElementById('footerNote').value = config.footerNote || '';
+                    if (document.getElementById('docType')) document.getElementById('docType').value = config.docType || 'INVOICE';
+                    if (document.getElementById('currency')) document.getElementById('currency').value = config.currency || '₦';
+                    if (document.getElementById('primaryColor')) document.getElementById('primaryColor').value = config.primaryColor || '#FF6B00';
+                    if (document.getElementById('secondaryColor')) document.getElementById('secondaryColor').value = config.secondaryColor || '#1A1A1A';
+                    if (document.getElementById('vatRate')) document.getElementById('vatRate').value = config.vatRate || '7.5';
+                    if (document.getElementById('stampStatus')) document.getElementById('stampStatus').value = config.stampStatus || 'PAID';
+                    
+                    if (config.template) {
+                        window.currentTemplate = config.template;
+                        document.querySelectorAll('.template-card').forEach(c => {
+                            c.classList.toggle('active', c.dataset.template === config.template);
+                        });
+                    }
+                    if (config.fontFamily) {
+                        window.currentFont = config.fontFamily;
+                        document.querySelectorAll('.typo-option').forEach(o => {
+                            o.classList.toggle('active', o.dataset.font === config.fontFamily);
+                        });
+                    }
+                    if (config.logoStyle) {
+                        window.currentLogoStyle = config.logoStyle;
+                        document.querySelectorAll('.logo-style-opt').forEach(o => {
+                            o.classList.toggle('active', o.dataset.style === config.logoStyle);
+                        });
+                    }
+                }
+            } else {
+                document.getElementById('brandName').value = 'AFRINET';
+                document.getElementById('tagline').value = 'Computer Systems';
+                document.getElementById('tel').value = '08140813999';
+                document.getElementById('rcNumber').value = 'RC 913487';
+                document.getElementById('address').value = '5 Otigba Street, Computer Village, Ikeja, Lagos';
+                document.getElementById('email').value = 'info@afrinet.com';
+                document.getElementById('defaultPayment').value = 'GTBank | Afrinet Systems Ltd | 0123456789';
+                document.getElementById('defaultTerms').value = 'Goods once sold are not returnable. Warranty covers manufacturer defects only.';
+                document.getElementById('footerNote').value = 'Thank you for your patronage!';
+            }
+        }
+
+        // ===== UTILITY FUNCTIONS =====
+        window.copyShareLink = function() {
+            if (window.generatedEngineURL) {
+                navigator.clipboard.writeText(window.generatedEngineURL).then(() => {
+                    alert('Share link copied to clipboard!');
+                });
+            }
+        }
+
+        window.openGeneratedEngine = function() {
+            if (window.generatedEngineURL) {
+                window.open(window.generatedEngineURL, '_blank');
+            }
+        }
+
+        window.copyTemplate = function() {
+            const html = document.getElementById('a4Preview').outerHTML;
+            const fullHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Preview</title><style>body{margin:0;padding:20px;background:#f0f0f0;}</style></head><body>${html}</body></html>`;
+            navigator.clipboard.writeText(fullHTML).then(() => {
+                alert('Engine HTML copied to clipboard!');
+            });
+        }
+
+        window.printReceipt = function() {
+            window.print();
+        }
+
+        window.downloadPreview = function() {
+            const html = document.getElementById('a4Preview').outerHTML;
+            const fullHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Preview</title><style>body{margin:0;padding:20px;background:#f0f0f0;}</style></head><body>${html}</body></html>`;
+            const blob = new Blob([fullHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'preview.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
