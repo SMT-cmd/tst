@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Receipt Engine - Secure Document System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600&family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;700;900&family=Dancing+Script:wght@400;700&family=Cinzel:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700;900&family=Oswald:wght@300;400;500;700&family=Raleway:wght@300;400;500;700;900&family=Bebas+Neue&family=Lora:wght@400;500;700&family=Inter:wght@300;400;500;700;900&family=Sora:wght@300;400;500;700;800&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600&family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;700;900&family=Dancing+Script:wght@400;700&family=Cinzel:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700;900&family=Oswald:wght@300;400;500;700&family=Raleway:wght@300;400;500;700;900&family=Bebas+Neue&family=Lora:wght@400;500;700&family=Inter:wght@300;400;500;700;900&family=Sora:wght@300;400;500;700;800&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#FF6B00">
+
+    <style>
+        :root {
+            --brand-primary: #FF6B00;
+            --brand-primary-light: #FF8533;
+            --brand-secondary: #1A1A1A;
+            --brand-dark: #1A1A1A;
+            --brand-gray: #4A4A4A;
+            --brand-light: #F5F5F5;
+            --brand-blue: #007bff;
+            --brand-green: #28a745;
+            
+            /* Template Variables */
+            --tpl-primary: var(--brand-primary);
+            --tpl-secondary: var(--brand-secondary);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        body { background: #e2e8f0; font-family: 'Rajdhani', sans-serif; padding: 0; margin: 0; min-height: 100vh; overflow-x: hidden; }
+
+        /* Control Panel Elements */
+        .panel-toggle { position: fixed; top: 20px; right: 20px; z-index: 1001; width: 50px; height: 50px; background: var(--brand-primary); color: white; border: none; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.3); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .panel-toggle:hover { transform: scale(1.1); }
+        .panel-toggle.hidden-panel { background: var(--brand-dark); }
+        
+        .control-panel { position: fixed; top: 80px; right: 20px; z-index: 1000; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); width: 300px; transition: all 0.3s ease; max-height: calc(100vh - 100px); overflow-y: auto; }
+        .control-panel.hidden { opacity: 0; transform: translateX(340px); pointer-events: none; }
+        .panel-title { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 800; color: var(--brand-dark); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid var(--brand-primary); display: flex; justify-content: space-between; align-items: center; }
+        
+        .btn { width: 100%; padding: 12px; margin-bottom: 10px; border: none; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary { background: var(--brand-primary); color: white; }
+        .btn-secondary { background: var(--brand-dark); color: white; }
+        .btn-success { background: var(--brand-green); color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-info { background: var(--brand-blue); color: white; }
+        
+        .control-group { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; }
+        .control-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--brand-gray); font-weight: 700; margin-bottom: 8px; display: block; }
+        .control-input { width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-family: 'Rajdhani', sans-serif; font-size: 14px; outline: none; background: #fff; }
+        .control-input:focus { border-color: var(--brand-primary); }
+        
+        .switch-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--brand-primary); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* Dashboard */
+        .dashboard-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .dashboard-content { background: white; width: 90%; max-width: 1000px; max-height: 85vh; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .dashboard-header { padding: 20px 30px; background: var(--brand-dark); color: white; display: flex; justify-content: space-between; align-items: center; }
+        .dashboard-header h2 { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; font-size: 20px; }
+        .close-dashboard { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        .history-list { padding: 20px; overflow-y: auto; flex: 1; }
+        .history-item { display: grid; grid-template-columns: 1fr 2fr 1fr 1fr 1.5fr; padding: 15px; border-bottom: 1px solid #eee; align-items: center; }
+        .history-item:hover { background: #f9f9f9; }
+        .history-item.header { font-weight: 700; text-transform: uppercase; font-size: 11px; color: var(--brand-gray); border-bottom: 2px solid var(--brand-primary); background: #fff; position: sticky; top: 0; z-index: 10; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .badge-invoice { background: #e3f2fd; color: #1976d2; }
+        .badge-receipt { background: #e8f5e9; color: #2e7d32; }
+        .badge-estimate { background: #fff3e0; color: #ef6c00; }
+        .action-btns { display: flex; gap: 10px; justify-content: flex-end; }
+        .action-btn { padding: 6px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: transform 0.2s; }
+        .action-btn:hover { transform: scale(1.1); }
+        .btn-view { background: var(--brand-blue); color: white; }
+        .btn-delete { background: #dc3545; color: white; }
+
+        /* Base A4 Receipt Structure */
+        .receipt-container { width: 210mm; min-height: 297mm; max-height: 297mm; margin: 20px auto; background: white; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.15); display: flex; flex-direction: column; color: #1a1a1a; font-size: 12px; overflow: hidden; box-sizing: border-box; }
+        .page-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-family: 'Orbitron', sans-serif; font-size: 80px; font-weight: 900; color: rgba(0,0,0,0.04); white-space: nowrap; pointer-events: none; z-index: 0; user-select: none; text-transform: uppercase; letter-spacing: 8px; }
+        .security-layer { position: absolute; inset: 0; background-image: radial-gradient(circle, var(--brand-primary) 0.5px, transparent 0.5px); background-size: 30px 30px; opacity: 0.04; pointer-events: none; z-index: 1; }
+        
+        /* Receipt Layout Sections */
+        .receipt-header { padding: 25px 35px; position: relative; z-index: 2; flex-shrink: 0; }
+        .header-content { display: flex; justify-content: space-between; align-items: flex-start; }
+        .brand-block { color: inherit; }
+        .brand-name { font-size: 32px; font-weight: 900; letter-spacing: 2px; }
+        .brand-name span { color: var(--brand-primary); }
+        .brand-tagline { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px; opacity: 0.8; }
+        .brand-contact { font-size: 10px; line-height: 1.6; margin-top: 10px; }
+        .brand-contact strong { color: var(--brand-primary); margin-right: 5px; }
+        .doc-type-badge { padding: 12px 25px; font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 3px; text-align: center; }
+        
+        .info-section { padding: 20px 35px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 2; flex-shrink: 0; }
+        .info-block { display: flex; flex-direction: column; gap: 4px; }
+        .info-block.full-width { grid-column: 1 / -1; }
+        .info-label { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; color: var(--brand-gray); }
+        .info-input { padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 600; color: var(--brand-dark); background: white; outline: none; }
+        .info-input:focus { border-color: var(--brand-primary); }
+        
+        .items-section { padding: 20px 35px; flex: 1; position: relative; z-index: 2; }
+        .section-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .section-line { flex: 1; height: 2px; background: linear-gradient(to right, var(--brand-primary), transparent); }
+        .section-title { font-family: 'Orbitron', sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; color: var(--brand-primary); }
+        
+        .items-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .items-table th { background: var(--brand-dark); color: white; padding: 12px 10px; text-align: left; font-family: 'Orbitron', sans-serif; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .items-table th:nth-child(1) { width: 8%; text-align: center; }
+        .items-table th:nth-child(2) { width: 44%; }
+        .items-table th:nth-child(3) { width: 12%; text-align: center; }
+        .items-table th:nth-child(4) { width: 18%; text-align: right; }
+        .items-table th:nth-child(5) { width: 18%; text-align: right; }
+        .items-table td { padding: 10px; border-bottom: 1px solid #e0e0e0; vertical-align: top; height: 45px; }
+        .items-table tr:nth-child(even) { background: rgba(0,0,0,0.02); }
+        
+        .cell-input { width: 100%; padding: 6px; border: 2px solid transparent; background: transparent; font-family: 'Rajdhani', sans-serif; font-size: 13px; color: var(--brand-dark); outline: none; border-radius: 4px; }
+        .cell-input:focus { border-color: var(--brand-primary); background: white; }
+        .cell-input.number { font-family: 'Roboto Mono', monospace; text-align: right; }
+        .cell-input.center { text-align: center; }
+        
+        .bottom-section { padding: 0 35px 20px; display: grid; grid-template-columns: 1fr 320px; gap: 30px; position: relative; z-index: 2; flex-shrink: 0; }
+        .words-box { background: rgba(255,107,0,0.05); border-left: 4px solid var(--brand-primary); padding: 15px; border-radius: 0 8px 8px 0; }
+        .words-label { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--brand-gray); font-weight: 700; margin-bottom: 5px; }
+        .words-input { width: 100%; padding: 8px; border: 2px solid transparent; background: white; border-radius: 6px; font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 600; color: var(--brand-dark); outline: none; }
+        .words-input:focus { border-color: var(--brand-primary); }
+        
+        .totals-box { width: 100%; background: var(--brand-light); border: 2px solid var(--brand-primary); border-radius: 8px; padding: 15px; }
+        .total-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #ddd; font-size: 12px; }
+        .total-row:last-child { border-bottom: none; border-top: 3px solid var(--brand-primary); margin-top: 8px; padding-top: 10px; }
+        .total-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--brand-gray); font-weight: 700; }
+        .total-value { font-family: 'Roboto Mono', monospace; font-size: 13px; font-weight: 600; color: var(--brand-dark); }
+        .total-value.grand { font-family: 'Orbitron', sans-serif; font-size: 18px; color: var(--brand-primary); font-weight: 800; }
+        .total-input { width: 120px; padding: 6px 10px; border: 2px solid var(--brand-primary); border-radius: 6px; font-family: 'Roboto Mono', monospace; font-size: 13px; text-align: right; background: white; outline: none; }
+
+        .signature-section { padding: 0 35px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; position: relative; z-index: 2; flex-shrink: 0; }
+        .signature-box { border-top: 2px solid var(--brand-dark); padding-top: 10px; position: relative; }
+        .signature-line { height: 35px; border-bottom: 1px dashed #ccc; margin-bottom: 8px; }
+        .signature-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--brand-gray); font-weight: 700; }
+        .signature-img { max-width: 150px; max-height: 60px; object-fit: contain; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); pointer-events: none; display: none; }
+
+        .digital-stamp { position: absolute; top: -30px; right: 10px; width: 120px; height: 120px; transform: rotate(-15deg); opacity: 0.9; z-index: 10; pointer-events: none; }
+        .stamp-outer { position: absolute; inset: 0; border: 3px solid var(--brand-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.95); box-shadow: 0 0 0 3px rgba(0,0,0,0.05), 0 0 15px rgba(0,0,0,0.1); }
+        .stamp-inner { position: absolute; inset: 5px; border: 2px solid var(--brand-primary); border-radius: 50%; border-style: dashed; }
+        .stamp-watermark { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.04; font-family: 'Orbitron', sans-serif; font-size: 35px; font-weight: 900; color: var(--brand-primary); transform: rotate(-15deg); }
+        .stamp-content { position: relative; z-index: 10; text-align: center; padding: 6px; }
+        .stamp-star { font-size: 8px; color: var(--brand-primary); margin-bottom: 2px; letter-spacing: 2px; }
+        .stamp-status { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; color: var(--brand-primary); text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; margin: 2px 0; }
+        .stamp-divider { width: 70%; height: 2px; background: linear-gradient(to right, transparent, var(--brand-primary), transparent); margin: 3px auto; }
+        .stamp-date { font-family: 'Roboto Mono', monospace; font-size: 8px; color: var(--brand-dark); font-weight: 700; }
+        .stamp-time { font-family: 'Roboto Mono', monospace; font-size: 7px; color: var(--brand-gray); }
+        .stamp-authority { font-size: 7px; color: var(--brand-primary); margin-top: 3px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; font-family: 'Orbitron', sans-serif; }
+
+        .footer-message { text-align: center; padding: 15px 35px; background: var(--brand-light); border-top: 3px solid var(--brand-primary); position: relative; z-index: 2; flex-shrink: 0; }
+        .message-text { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--brand-primary); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+        .receipt-footer { background: var(--brand-dark); padding: 15px 35px; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; flex-shrink: 0; margin-top: auto; }
+        .footer-brand { font-family: 'Orbitron', sans-serif; font-size: 14px; color: white; letter-spacing: 2px; }
+        .footer-brand span { color: var(--brand-primary); }
+        .footer-contact { font-size: 10px; color: rgba(255,255,255,0.8); letter-spacing: 1px; }
+
+        .slip-btn { background: rgba(255,107,0,0.1); color: var(--brand-primary); border: 1px dashed var(--brand-primary); padding: 8px 15px; border-radius: 6px; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; }
+        .slip-btn:hover { background: var(--brand-primary); color: white; }
+
+        .row-del-btn { opacity: 0; transition: opacity 0.2s; }
+        tr:hover .row-del-btn { opacity: 1; }
+
+        /* Print Specific CSS */
+        @media print { 
+            body { background: white; padding: 0; margin: 0; } 
+            .control-panel, .panel-toggle, .dashboard-overlay, .no-print, .row-del-btn, .help-btn, #howToUseCard { display: none !important; } 
+            .receipt-container { box-shadow: none; width: 210mm; height: 297mm; margin: 0; page-break-after: always; transform: none !important; } 
+            @page { size: A4; margin: 0; } 
+        }
+
+        @media screen and (max-width: 768px) { 
+            .receipt-container { transform: scale(0.45); transform-origin: top center; margin-bottom: -450px; } 
+            .control-panel { width: 94vw; right: 3vw; left: 3vw; top: 70px; } 
+        }
+
+        /* Basic Template Styles (Intact) */
+        .tpl-modern-tech { font-family: 'Rajdhani', sans-serif; }
+        .tpl-modern-tech .receipt-header { background: var(--tpl-secondary, #1A1A1A); color: white; }
+        .tpl-modern-tech .header-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .brand-name span, .tpl-modern-tech .brand-contact strong { color: var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .doc-type-badge { background: var(--tpl-primary, #FF6B00); color: white; transform: rotate(-3deg); box-shadow: 0 10px 30px rgba(255,107,0,0.4); }
+        .tpl-modern-tech .info-section { background: #f5f5f5; border-bottom: 3px solid var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .items-table th { background: var(--tpl-secondary, #1A1A1A); color: white; }
+        .tpl-modern-tech .words-box { background: rgba(255,107,0,0.05); border-left: 4px solid var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .totals-box { background: #f5f5f5; border: 2px solid var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .total-row:last-child { border-color: var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .total-value.grand, .tpl-modern-tech .message-text, .tpl-modern-tech .footer-brand span { color: var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .stamp-outer { border: 3px solid var(--tpl-primary, #FF6B00); }
+        .tpl-modern-tech .receipt-footer { background: var(--tpl-secondary, #1A1A1A); color: white; }
+        
+        /* NOTE: Remaining 34 template styles omitted for brevity, but they should remain exactly as they are in your live code */
+        
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideInLeft { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .powered-by-footer { margin-top: 40px; padding: 20px 35px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+        .powered-link { color: var(--tpl-primary, #FF6B00); text-decoration: none; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <button class="panel-toggle" onclick="togglePanel()" title="Toggle Controls">⚙️</button>
+
+    <div class="control-panel hidden" id="controlPanel">
+        <div class="panel-title">
+            <span>Engine Controls</span>
+            <button class="action-btn btn-view" onclick="openDashboard()" title="View History">📜</button>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">Document Type</label>
+            <select class="control-input" id="docTypeSelect" onchange="updateDocType()">
+                <option value="INVOICE">INVOICE</option>
+                <option value="RECEIPT">RECEIPT</option>
+                <option value="ESTIMATE">ESTIMATE</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <div class="switch-container">
+                <span class="control-label" style="margin-bottom: 0;">Include VAT</span>
+                <label class="switch">
+                    <input type="checkbox" id="vatToggle" checked onchange="calculateTotals()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="switch-container">
+                <span class="control-label" style="margin-bottom: 0;">Show Stamp</span>
+                <label class="switch">
+                    <input type="checkbox" id="stampToggle" checked onchange="toggleElement('digitalStamp', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="switch-container">
+                <span class="control-label" style="margin-bottom: 0;">Show Watermark</span>
+                <label class="switch">
+                    <input type="checkbox" id="watermarkToggle" checked onchange="toggleElement('watermark', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="switch-container">
+                <span class="control-label" style="margin-bottom: 0;">Show QR Code</span>
+                <label class="switch">
+                    <input type="checkbox" id="qrToggle" checked onchange="toggleElement('verificationQR', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="calculateTotals()">🧮 Calculate Totals</button>
+        <button class="btn btn-success" onclick="generateWords()">📝 Auto Words</button>
+        <button class="btn btn-info" onclick="saveToHistory()">💾 Save to History</button>
+        
+        <div class="control-group">
+            <label class="control-label">Stamp Authority</label>
+            <input type="text" class="control-input" id="stampName" onchange="updateStamp()">
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">Stamp Status</label>
+            <select class="control-input" id="stampStatus" onchange="updateStamp()">
+                <option value="PAID">PAID</option>
+                <option value="APPROVED">APPROVED</option>
+                <option value="PROCESSED">PROCESSED</option>
+                <option value="VERIFIED">VERIFIED</option>
+            </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="savePDF()">📄 Download PDF</button>
+        <button class="btn btn-success" onclick="saveImage()">🖼️ Download Image</button>
+        <button class="btn btn-info" onclick="shareDocument()">🔗 Share Document</button>
+        <button class="btn btn-secondary" onclick="window.print()">🖨️ Direct Print</button>
+        <button class="btn btn-secondary" onclick="window.location.href='../admin.html'">🔑 Go to Admin Dashboard</button>
+        <button class="btn btn-info" id="installBtn" style="display: none; background: #6f42c1;" onclick="installPWA()">📲 Install as App</button>
+
+        <div class="control-group">
+            <label class="control-label">Authorized Signature</label>
+            <div class="signature-upload-container">
+                <div class="signature-preview-mini" id="sigPreviewMini" style="height: 40px; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    <span style="color: #888; font-size: 11px;">No signature</span>
+                </div>
+                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                    <button class="btn btn-secondary" style="margin-bottom: 0; flex: 1; font-size: 11px;" onclick="document.getElementById('sigInput').click()">Upload</button>
+                    <button class="btn btn-danger" style="margin-bottom: 0; width: 40px; padding: 0;" onclick="clearSavedSignature()">✕</button>
+                </div>
+                <input type="file" id="sigInput" accept="image/*" style="display: none;" onchange="handleSignatureUpload(this)">
+            </div>
+        </div>
+
+        <button class="btn btn-danger" onclick="clearReceipt()">🗑️ Reset Engine</button>
+    </div>
+
+    <div class="dashboard-overlay" id="dashboardOverlay">
+        <div class="dashboard-content">
+            <div class="dashboard-header">
+                <h2>History Dashboard</h2>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div style="position: relative;">
+                        <input type="text" id="historySearch" placeholder="Search customer..." style="padding: 8px 30px 8px 10px; border-radius: 20px; border: none; font-size: 12px; width: 200px;" oninput="renderHistory()">
+                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #888;">🔍</span>
+                    </div>
+                    <button class="btn btn-success" style="margin-bottom: 0; padding: 8px 15px; width: auto; font-size: 11px;" onclick="exportHistoryCSV()">📊 Export CSV</button>
+                    <button class="btn btn-danger" style="margin-bottom: 0; padding: 8px 15px; width: auto; font-size: 11px;" onclick="clearAllHistory()">🗑️ Clear All</button>
+                    <button class="close-dashboard" onclick="closeDashboard()">✕</button>
+                </div>
+            </div>
+            <div class="history-list">
+                <div class="history-item header">
+                    <div>Date/Time</div>
+                    <div>Customer</div>
+                    <div>Type</div>
+                    <div>Total</div>
+                    <div style="text-align: right;">Actions</div>
+                </div>
+                <div id="historyItems"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pwaPopup" style="position: fixed; bottom: 20px; left: 20px; right: 20px; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 10000; display: none; align-items: center; justify-content: space-between; border-left: 5px solid var(--brand-primary); animation: slideUp 0.5s ease-out;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="font-size: 30px;">📲</div>
+            <div>
+                <div style="font-weight: 800; font-family: 'Orbitron', sans-serif; font-size: 14px; color: var(--brand-dark);">INSTALL AS APP</div>
+                <div style="font-size: 11px; color: #666;">Operate this engine like a professional app on your home screen.</div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary" style="margin: 0; padding: 8px 15px; width: auto; font-size: 11px;" onclick="installPWA()">Install</button>
+            <button class="btn btn-secondary" style="margin: 0; padding: 8px 15px; width: auto; font-size: 11px; background: #eee; color: #333;" onclick="closePWAPopup()">Later</button>
+        </div>
+    </div>
+
+    <div id="howToUseCard" style="position: fixed; top: 20px; left: 20px; background: white; width: 340px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; border-top: 5px solid var(--brand-primary); padding: 25px; display: none; animation: slideInLeft 0.5s ease-out; max-height: 90vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 800; color: var(--brand-dark);">MASTERING THE ENGINE</div>
+            <button onclick="closeHowToUse()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #888;">✕</button>
+        </div>
+        <div style="font-size: 12px; color: #444; line-height: 1.6;">
+            <p style="margin-bottom: 12px;">Welcome! This <strong>Branded Engine</strong> is now yours. Here is how to use the <strong>Control Panel</strong> effectively:</p>
+            <div style="margin-bottom: 15px;">
+                <div style="font-weight: 700; color: var(--brand-primary); margin-bottom: 5px; text-transform: uppercase; font-size: 10px; letter-spacing: 1px;">⚙️ The Control Panel</div>
+                <p>Tap the <strong>Gear Icon</strong> at the top right to access all hidden tools.</p>
+            </div>
+            <ul style="padding-left: 18px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
+                <li><strong>Document Type:</strong> Switch between <em>Invoice</em>, <em>Receipt</em>, or <em>Estimate</em>. The system automatically updates the status stamp.</li>
+                <li><strong>Toggles:</strong> Control the visibility of <em>VAT</em>, <em>Digital Stamp</em>, <em>Security Watermark</em>, and the <em>Verification QR Code</em>.</li>
+                <li><strong>Stamp Customization:</strong> Change the authority name (e.g., "Manager") and status (e.g., "VERIFIED") directly from the panel.</li>
+                <li><strong>Authorized Signature:</strong> Upload your signature once; it saves locally and appears on every document you generate.</li>
+                <li><strong>History Manager:</strong> Tap the 📜 icon in the panel to view, edit, or export your entire generation history.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="maintenanceOverlay" style="position: fixed; inset: 0; background: #fff; z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+        <div style="font-size: 80px; margin-bottom: 20px;">🛠️</div>
+        <h1 style="font-family: 'Orbitron', sans-serif; color: #1A1A1A; margin-bottom: 10px;">UNDER MAINTENANCE</h1>
+        <p style="color: #666; max-width: 400px; line-height: 1.6;">This engine is currently undergoing scheduled maintenance. Please check back in about 15 minutes.</p>
+        <div style="margin-top: 30px; font-size: 12px; color: #aaa; text-transform: uppercase; letter-spacing: 2px;">Powered by MetaForge</div>
+    </div>
+
+    <div id="authModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 20000; display: none; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; border-radius: 20px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <div style="font-family: 'Orbitron', sans-serif; font-size: 20px; color: var(--brand-dark); margin-bottom: 10px; text-align: center;">Welcome to MetaForge</div>
+            <p style="font-size: 12px; color: #666; text-align: center; margin-bottom: 25px;">Please sign up or log in to claim and access your branded document engine.</p>
+            <div id="authForm">
+                <div class="control-group">
+                    <label class="control-label">Email Address</label>
+                    <input type="email" id="authEmail" class="control-input" placeholder="you@example.com">
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Password</label>
+                    <input type="password" id="authPassword" class="control-input" placeholder="••••••••">
+                </div>
+                <button class="btn btn-primary" onclick="handleAuth()">Sign Up / Log In</button>
+            </div>
+            <div id="authLoading" style="display: none; text-align: center; padding: 20px;">
+                <div style="font-size: 14px; font-weight: 700; color: var(--brand-primary);">Authenticating...</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="help-btn no-print" onclick="openHowToUse()" style="position: fixed; bottom: 30px; left: 30px; width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--brand-primary); cursor: pointer; z-index: 1000; box-shadow: 0 5px 20px rgba(0,0,0,0.2); border: 2px solid var(--brand-primary); transition: transform 0.3s;">?</button>
+
+    <div class="receipt-container" id="receipt">
+        <div class="page-watermark" id="watermark">BRAND NAME</div>
+        <div class="security-layer"></div>
+
+        <header class="receipt-header">
+            <div class="header-content">
+                <div class="brand-block">
+                    <div id="brandLogoContainer" style="display: none; margin-bottom: 10px;">
+                        <img id="brandLogo" src="" alt="Logo" style="max-height: 60px; max-width: 180px; object-fit: contain;">
+                    </div>
+                    <div class="brand-name" id="brandNameDisplay">BRAND<span>NAME</span></div>
+                    <div class="brand-tagline" id="taglineDisplay">Tagline Goes Here</div>
+                    <div class="brand-contact" id="contactDisplay">
+                        <div><strong>RC:</strong> <span id="rcDisplay">XXXXXX</span></div>
+                        <div id="tinContainer"><strong>TIN:</strong> <span id="tinDisplay">XXXXXXXX</span></div>
+                        <div><strong>Address:</strong> <span id="addressDisplay">Business Address</span></div>
+                        <div><strong>Tel:</strong> <span id="telDisplay">0000000000</span></div>
+                    </div>
+                </div>
+                <div class="doc-type-badge" id="docTypeDisplay">INVOICE</div>
+            </div>
+        </header>
+
+        <section class="info-section">
+            <div class="info-block full-width">
+                <label class="info-label">Client / Customer Name</label>
+                <input type="text" class="info-input" id="clientName" placeholder="Enter customer name">
+            </div>
+            <div class="info-block">
+                <label class="info-label">Address</label>
+                <input type="text" class="info-input" id="clientAddress" placeholder="Enter address">
+            </div>
+            <div class="info-block">
+                <label class="info-label">Date</label>
+                <input type="date" class="info-input" id="receiptDate">
+            </div>
+        </section>
+
+        <section class="items-section">
+            <div class="section-header">
+                <div class="section-line"></div>
+                <div class="section-title">Items Purchased</div>
+                <div class="section-line" style="background: linear-gradient(to left, var(--brand-primary), transparent);"></div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <button class="slip-btn no-print" onclick="addItem()">➕ Add New Item</button>
+            </div>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>S/N</th>
+                        <th>Item Description</th>
+                        <th>Qty</th>
+                        <th>Price (<span class="currency-symbol">₦</span>)</th>
+                        <th>Total (<span class="currency-symbol">₦</span>)</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsBody"></tbody>
+            </table>
+        </section>
+
+        <div class="bottom-section">
+            <div class="words-section">
+                <div class="words-box">
+                    <div class="words-label">Amount in Words</div>
+                    <input type="text" class="words-input" id="amountWords" placeholder="Amount in words...">
+                </div>
+                
+                <div class="extra-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <div class="payment-details">
+                        <div class="words-label">Payment Details</div>
+                        <div id="paymentDisplay" style="font-size: 11px; color: #444; line-height: 1.6; white-space: pre-wrap;"></div>
+                    </div>
+                    <div class="terms-conditions">
+                        <div class="words-label">Terms & Conditions</div>
+                        <div id="termsDisplay" style="font-size: 11px; color: #444; line-height: 1.6; white-space: pre-wrap;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="totals-section">
+                <div class="totals-box">
+                    <div class="total-row">
+                        <span class="total-label">Subtotal</span>
+                        <input type="text" class="total-input" id="subtotal" value="0.00" readonly>
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">Discount (%)</span>
+                        <input type="number" class="total-input" id="discount" value="0" min="0" max="100" onchange="calculateTotals()">
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">VAT (<span id="vatRateDisplay">7.5</span>%)</span>
+                        <input type="text" class="total-input" id="vat" value="0.00" readonly>
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">TOTAL</span>
+                        <span class="total-value grand" id="grandTotal">₦ 0.00</span>
+                    </div>
+                    <div class="total-row no-print">
+                        <span class="total-label">Amount Paid</span>
+                        <input type="number" class="total-input" id="amountPaid" value="0" step="0.01" onchange="calculateTotals()">
+                    </div>
+                    <div class="total-row" id="balanceRow" style="border-top: 1px dashed var(--brand-primary);">
+                        <span class="total-label">Balance Due</span>
+                        <span class="total-value" id="balanceDue">₦ 0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="signature-section">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div class="signature-label">Customer's Signature</div>
+            </div>
+            <div class="signature-box">
+                <div class="digital-stamp" id="digitalStamp">
+                    <div class="stamp-outer">
+                        <div class="stamp-inner"></div>
+                        <div class="stamp-watermark">✓</div>
+                        <div class="stamp-content">
+                            <div class="stamp-star">★ ★ ★</div>
+                            <div class="stamp-status" id="stampStatusText">PAID</div>
+                            <div class="stamp-divider"></div>
+                            <div class="stamp-date" id="stampDate"></div>
+                            <div class="stamp-time" id="stampTime"></div>
+                            <div class="stamp-authority" id="stampAuthorityText">BRAND NAME</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="qr-code-box" style="position: absolute; top: -30px; right: 0; width: 65px; height: 65px; background: white; padding: 5px; border: 1px solid #eee; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <img id="verificationQR" src="" alt="QR Code" style="width: 100%; height: auto; image-rendering: pixelated;">
+                    <div style="font-size: 7px; text-align: center; margin-top: 3px; color: #888; font-weight: 700;">VERIFY</div>
+                </div>
+                <div class="signature-line"></div>
+                <div class="signature-label">Authorized Signature & Stamp</div>
+                <img id="receiptSignature" class="signature-img" src="" alt="Signature">
+            </div>
+        </section>
+
+        <div class="footer-message">
+            <div class="message-text" id="footerNoteDisplay">Thanks for your patronage!</div>
+        </div>
+        <footer class="receipt-footer">
+            <div class="footer-brand" id="footerBrand">BRAND<span>NAME</span></div>
+            <div class="footer-contact" id="footerContact">RC: XXXXXX | Address | Tel</div>
+        </footer>
+        <div class="powered-by-footer">
+            <div>Powered by <a href="https://skillforgedigital.com.ng" class="powered-link">skillforgedigital.com.ng</a></div>
+            <div>Generated by <a href="https://metaforge.website" class="powered-link">metaforge.website</a></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, updateDoc, getDoc, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAElgJBP-F322zoJ-T1qeE48s2ka0EcEvw", 
+            authDomain: "metaforge-6afdf.firebaseapp.com", 
+            projectId: "metaforge-6afdf", 
+            storageBucket: "metaforge-6afdf.firebasestorage.app", 
+            messagingSenderId: "261172077627", 
+            appId: "1:261172077627:web:cb3cec74be2dbcb1d6281e"
+        }; 
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let config = null;
+        let history = [];
+        let savedSignature = null;
+        let currentCurrency = '₦';
+        let currentVatRate = 7.5;
+        let shortCode = null;
+        let historyCollectionRef = null;
+
+        // --- AUTHENTICATION & CLOUD SYNC ---
+        onAuthStateChanged(auth, async (user) => {
+            const hash = window.location.hash;
+            const scMatch = hash.match(/[#_]sc=([a-zA-Z0-9]{6})$/);
+            shortCode = scMatch ? scMatch[1] : null;
+
+            if (shortCode) {
+                const shortDocRef = doc(db, "short_urls", shortCode);
+                const docSnap = await getDoc(shortDocRef);
+                if (docSnap.exists() && docSnap.data().status === 'maintenance') {
+                    document.getElementById('maintenanceOverlay').style.display = 'flex';
+                    document.getElementById('authModal').style.display = 'none';
+                    return;
+                }
+            }
+
+            if (user) {
+                currentUser = user;
+                document.getElementById('authModal').style.display = 'none';
+                
+                if (shortCode) {
+                    await checkAndClaimLink(user, shortCode);
+                    historyCollectionRef = collection(db, "short_urls", shortCode, "receipts");
+                    loadDataFromFirestore();
+                } else {
+                    loadDataFromLocalStorage();
+                }
+            } else {
+                if (shortCode) {
+                    document.getElementById('authModal').style.display = 'flex';
+                } else {
+                    document.getElementById('authModal').style.display = 'none';
+                    loadDataFromLocalStorage();
+                }
+            }
+        });
+
+        // Combined Auth function: Logs in, if user doesn't exist, creates account.
+        window.handleAuth = async function() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            if (!email || !password) return alert("Email and password required");
+
+            document.getElementById('authForm').style.display = 'none';
+            document.getElementById('authLoading').style.display = 'block';
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (err) {
+                if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/invalid-login-credentials') {
+                    try {
+                        await createUserWithEmailAndPassword(auth, email, password);
+                    } catch (createErr) {
+                        alert(createErr.message);
+                        document.getElementById('authForm').style.display = 'block';
+                        document.getElementById('authLoading').style.display = 'none';
+                    }
+                } else {
+                    alert(err.message);
+                    document.getElementById('authForm').style.display = 'block';
+                    document.getElementById('authLoading').style.display = 'none';
+                }
+            }
+        };
+
+        async function checkAndClaimLink(user, code) {
+            try {
+                const shortDocRef = doc(db, "short_urls", code);
+                const docSnap = await getDoc(shortDocRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.owner_email === null) {
+                        await updateDoc(shortDocRef, {
+                            owner_email: user.email,
+                            owner_uid: user.uid,
+                            claimed_at: serverTimestamp()
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Error claiming link:", err);
+            }
+        }
+
+        async function loadDataFromFirestore() {
+            if (!historyCollectionRef) return;
+            const q = query(historyCollectionRef, orderBy("timestamp", "desc"));
+            onSnapshot(q, (snapshot) => {
+                history = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderHistory();
+            });
+        }
+
+        function loadDataFromLocalStorage() {
+            if (!config) {
+                const hash = window.location.hash.slice(1);
+                if (hash) config = decodeConfigFromURL(hash);
+            }
+            if (config && config.brandName) {
+                const brandKey = config.brandName.replace(/\s+/g, '_');
+                const storedHistory = localStorage.getItem(brandKey + '_history');
+                if (storedHistory) {
+                    history = JSON.parse(storedHistory);
+                    renderHistory();
+                }
+            }
+        }
+
+        // --- ENCODING & CONFIG DECODING ---
+        function decodeConfigFromURL(hash) {
+            try {
+                let payload = hash.split('_sc=')[0].split('#sc=')[0];
+                const parts = payload.split('_');
+                const base64Str = parts.length > 1 ? parts[1] : parts[0];
+                
+                const binary = atob(base64Str);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                const json = new TextDecoder().decode(bytes);
+                const compressed = JSON.parse(json);
+                
+                const KEY_MAP = {
+                    bn: 'brandName', lu: 'logoUrl', tg: 'tagline', ph: 'tel', rc: 'rcNumber', tn: 'tinNumber',
+                    ad: 'address', em: 'email', bk: 'bankName', an: 'accName', ac: 'accNumber',
+                    dp: 'defaultPayment', dt: 'defaultTerms', fn: 'footerNote', dtp: 'docType',
+                    cy: 'currency', pc: 'primaryColor', sc: 'secondaryColor', vr: 'vatRate',
+                    ss: 'stampStatus', ff: 'fontFamily', tp: 'template', ls: 'logoStyle', ts: 'timestamp'
+                };
+                
+                const decompressed = {};
+                for (let shortKey in compressed) {
+                    const key = KEY_MAP[shortKey] || shortKey;
+                    decompressed[key] = compressed[shortKey];
+                }
+                if (compressed.locked) decompressed.locked = true;
+                return decompressed;
+            } catch(e) {
+                console.error("Decoding error:", e);
+                return null;
+            }
+        }
+
+        function formatLogo(name, primary, secondary, logoStyle) {
+            const words = name.split(' ');
+            switch(logoStyle) {
+                case 'split': return words.map((word, i) => i === 0 ? word : `<span style="color:${primary}">${word}</span>`).join(' ');
+                case 'underline': return `<span style="border-bottom: 4px solid ${primary}; padding-bottom: 2px;">${name}</span>`;
+                case 'boxed': return `<span style="background: ${primary}; color: #fff; padding: 5px 15px;">${name}</span>`;
+                case 'modern': return `${name}<span style="color:${primary}">.</span>`;
+                case 'gradient': return `<span style="background: linear-gradient(45deg, ${primary}, ${secondary}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${name}</span>`;
+                case 'outline': return `<span style="-webkit-text-stroke: 1.5px ${primary}; color: transparent;">${name}</span>`;
+                default: return name;
+            }
+        }
+
+        window.applyBranding = function() {
+            const hash = window.location.hash.slice(1);
+            if (!hash) return;
+            config = decodeConfigFromURL(hash);
+            if (!config) return;
+
+            document.title = `${config.brandName} - Receipt Engine`;
+            const primary = config.primaryColor || '#FF6B00';
+            const secondary = config.secondaryColor || '#1A1A1A';
+            const logoStyle = config.logoStyle || 'split';
+
+            const logoHtml = formatLogo(config.brandName, primary, secondary, logoStyle);
+            const isSwiss = config.template === 'swiss-design';
+            
+            const receipt = document.getElementById('receipt');
+            receipt.style.fontFamily = config.fontFamily || "'Rajdhani', sans-serif";
+
+            document.getElementById('watermark').textContent = config.brandName.toUpperCase();
+
+            if (!isSwiss) {
+                document.getElementById('brandNameDisplay').innerHTML = logoHtml;
+                if (config.logoUrl) {
+                    const logoImg = document.getElementById('brandLogo');
+                    const logoCont = document.getElementById('brandLogoContainer');
+                    logoImg.src = config.logoUrl;
+                    logoCont.style.display = 'block';
+                    document.getElementById('brandNameDisplay').style.display = 'none';
+                }
+            }
+            
+            document.getElementById('footerBrand').innerHTML = logoHtml;
+            if (document.getElementById('taglineDisplay')) document.getElementById('taglineDisplay').textContent = config.tagline;
+            if (document.getElementById('rcDisplay')) document.getElementById('rcDisplay').textContent = config.rcNumber;
+            if (document.getElementById('tinDisplay')) {
+                if (config.tinNumber) {
+                    document.getElementById('tinDisplay').textContent = config.tinNumber;
+                    document.getElementById('tinContainer').style.display = 'block';
+                } else {
+                    document.getElementById('tinContainer').style.display = 'none';
+                }
+            }
+            if (document.getElementById('addressDisplay')) document.getElementById('addressDisplay').textContent = config.address;
+            if (document.getElementById('telDisplay')) document.getElementById('telDisplay').textContent = config.tel;
+            
+            const tinText = config.tinNumber ? ` | TIN: ${config.tinNumber}` : '';
+            document.getElementById('footerContact').textContent = `RC: ${config.rcNumber}${tinText} | ${config.address} | ${config.tel}`;
+            document.getElementById('footerNoteDisplay').textContent = config.footerNote;
+            document.getElementById('docTypeDisplay').textContent = config.docType;
+            document.getElementById('docTypeSelect').value = config.docType;
+            document.getElementById('stampName').value = config.brandName;
+            document.getElementById('stampAuthorityText').textContent = config.brandName;
+            document.getElementById('stampStatus').value = config.stampStatus || 'PAID';
+            document.getElementById('stampStatusText').textContent = config.stampStatus || 'PAID';
+            
+            if (document.getElementById('paymentDisplay')) {
+                let paymentHtml = '';
+                if (config.bankName && config.accNumber) {
+                    paymentHtml += `BANK: ${config.bankName}\nACC NAME: ${config.accName || config.brandName}\nACC NO: ${config.accNumber}\n\n`;
+                }
+                paymentHtml += config.defaultPayment || '';
+                document.getElementById('paymentDisplay').textContent = paymentHtml;
+            }
+            if (document.getElementById('termsDisplay')) {
+                document.getElementById('termsDisplay').textContent = config.defaultTerms || '';
+            }
+
+            const root = document.documentElement;
+            root.style.setProperty('--brand-primary', primary);
+            root.style.setProperty('--brand-secondary', secondary);
+            root.style.setProperty('--tpl-primary', primary);
+            root.style.setProperty('--tpl-secondary', secondary);
+
+            receipt.className = 'receipt-container';
+            receipt.classList.add('tpl-' + (config.template || 'modern-tech'));
+            
+            currentCurrency = config.currency || '₦';
+            currentVatRate = parseFloat(config.vatRate) || 7.5;
+            document.querySelectorAll('.currency-symbol').forEach(el => el.textContent = currentCurrency);
+            document.getElementById('vatRateDisplay').textContent = currentVatRate;
+        };
+
+        // --- ENGINE UI LOGIC ---
+        window.togglePanel = function() {
+            const panel = document.getElementById('controlPanel');
+            const toggle = document.querySelector('.panel-toggle');
+            panel.classList.toggle('hidden');
+            toggle.classList.toggle('hidden-panel');
+            toggle.innerHTML = panel.classList.contains('hidden') ? '⚙️' : '✕';
+        };
+
+        window.toggleElement = function(id, show) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = show ? 'block' : 'none';
+        };
+
+        window.updateDocType = function() { 
+            const type = document.getElementById('docTypeSelect').value;
+            document.getElementById('docTypeDisplay').textContent = type;
+            const stampStatus = document.getElementById('stampStatus');
+            if (type === 'RECEIPT') stampStatus.value = 'PAID';
+            else if (type === 'ESTIMATE') stampStatus.value = 'APPROVED';
+            else stampStatus.value = 'PROCESSED';
+            updateStamp();
+        };
+
+        window.updateStamp = function() {
+            document.getElementById('stampAuthorityText').textContent = document.getElementById('stampName').value;
+            document.getElementById('stampStatusText').textContent = document.getElementById('stampStatus').value;
+            refreshStamp();
+        };
+
+        window.refreshStamp = function() {
+            const now = new Date();
+            const dateEl = document.getElementById('stampDate');
+            const timeEl = document.getElementById('stampTime');
+            if (dateEl) dateEl.textContent = now.toISOString().split('T')[0];
+            if (timeEl) timeEl.textContent = now.toTimeString().split(' ')[0];
+            
+            const qrEl = document.getElementById('verificationQR');
+            if (qrEl) {
+                const currentUrl = window.location.href;
+                qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}`;
+            }
+        };
+
+        window.addItem = function(desc, qty, price) {
+            const tbody = document.getElementById('itemsBody');
+            if (!tbody) return;
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td style="text-align: center; font-weight: 700; position: relative;">
+                    <span class="sn">${tbody.rows.length}</span>
+                    <button class="no-print row-del-btn" onclick="deleteRow(this)" style="position: absolute; left: -25px; top: 50%; transform: translateY(-50%); background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+                </td>
+                <td><input type="text" class="cell-input" value="${desc || ''}" placeholder="Item description..."></td>
+                <td><input type="number" class="cell-input center qty" value="${qty || 1}" min="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" class="cell-input number price" value="${price || ''}" placeholder="0.00" step="0.01" onchange="calculateRow(this)"></td>
+                <td><input type="text" class="cell-input number total" value="0.00" readonly></td>
+            `;
+            if(price) row.querySelector('.total').value = (qty * price).toLocaleString('en-NG', {minimumFractionDigits: 2});
+        };
+
+        window.deleteRow = function(btn) {
+            const row = btn.closest('tr');
+            row.remove();
+            document.querySelectorAll('#itemsBody tr').forEach((r, i) => r.querySelector('.sn').textContent = i + 1);
+            calculateTotals();
+        };
+
+        window.calculateRow = function(input) {
+            const row = input.closest('tr');
+            const qty = parseFloat(row.querySelector('.qty').value) || 0;
+            const price = parseFloat(row.querySelector('.price').value) || 0;
+            row.querySelector('.total').value = (qty * price).toLocaleString('en-NG', {minimumFractionDigits: 2});
+            calculateTotals();
+        };
+
+        window.calculateTotals = function() {
+            let subtotal = 0;
+            document.querySelectorAll('.total').forEach(input => subtotal += parseFloat(input.value.replace(/,/g, '')) || 0);
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+            const afterDiscount = subtotal * (1 - discount / 100);
+            const vat = document.getElementById('vatToggle').checked ? afterDiscount * (currentVatRate / 100) : 0;
+            const grandTotal = afterDiscount + vat;
+            
+            const paid = parseFloat(document.getElementById('amountPaid').value) || 0;
+            const balance = grandTotal - paid;
+
+            document.getElementById('subtotal').value = subtotal.toLocaleString('en-NG', {minimumFractionDigits: 2});
+            document.getElementById('vat').value = vat.toLocaleString('en-NG', {minimumFractionDigits: 2});
+            document.getElementById('grandTotal').textContent = `${currentCurrency} ${grandTotal.toLocaleString('en-NG', {minimumFractionDigits: 2})}`;
+            
+            document.getElementById('balanceDue').textContent = `${currentCurrency} ${balance.toLocaleString('en-NG', {minimumFractionDigits: 2})}`;
+            document.getElementById('balanceRow').style.display = (paid > 0) ? 'flex' : 'none';
+
+            return grandTotal;
+        };
+
+        window.numberToWords = function(num) {
+            const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const scales = ['', 'Thousand', 'Million', 'Billion'];
+            if (num === 0) return 'Zero';
+            function convertChunk(n) {
+                let res = '';
+                if (n >= 100) { res += ones[Math.floor(n / 100)] + ' Hundred '; n %= 100; }
+                if (n >= 20) { res += tens[Math.floor(n / 10)] + ' '; n %= 10; }
+                if (n > 0) res += ones[n] + ' ';
+                return res.trim();
+            }
+            let word = '', scaleIdx = 0, temp = num;
+            while (temp > 0) {
+                const chunk = temp % 1000;
+                if (chunk > 0) word = convertChunk(chunk) + (scales[scaleIdx] ? ' ' + scales[scaleIdx] : '') + ' ' + word;
+                temp = Math.floor(temp / 1000); scaleIdx++;
+            }
+            const currencyName = currentCurrency === '₦' ? 'Naira' : 'Units';
+            return word.trim() + ' ' + currencyName + ' only';
+        };
+
+        window.generateWords = function() {
+            const total = calculateTotals();
+            if (total > 0) document.getElementById('amountWords').value = numberToWords(Math.floor(total));
+        };
+
+        // THE CRITICAL CLOUD SYNC SAVE FIX
+        window.saveToHistory = async function() {
+            const total = calculateTotals();
+            if (total <= 0) return;
+            const now = new Date();
+            const entry = {
+                id: Date.now(),
+                date: document.getElementById('receiptDate').value,
+                time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                customer: document.getElementById('clientName').value || 'Unnamed',
+                type: document.getElementById('docTypeSelect').value,
+                total: total.toLocaleString('en-NG', {minimumFractionDigits: 2}),
+                data: {
+                    address: document.getElementById('clientAddress').value,
+                    items: Array.from(document.querySelectorAll('#itemsBody tr')).map(row => ({
+                        desc: row.cells[1].querySelector('input').value,
+                        qty: row.cells[2].querySelector('input').value,
+                        price: row.cells[3].querySelector('input').value
+                    })),
+                    discount: document.getElementById('discount').value,
+                    vatEnabled: document.getElementById('vatToggle').checked,
+                    words: document.getElementById('amountWords').value
+                }
+            };
+
+            // If user is authenticated and we have the Firebase reference, save to Cloud Firestore!
+            if (currentUser && historyCollectionRef) {
+                try {
+                    await addDoc(historyCollectionRef, {
+                        ...entry,
+                        timestamp: serverTimestamp()
+                    });
+                    alert('✅ Receipt Saved Successfully to Cloud History!');
+                } catch(e) {
+                    console.error(e);
+                    alert('Error saving to cloud: ' + e.message);
+                }
+            } else {
+                // Offline fallback mode
+                history.unshift(entry);
+                const brandKey = config.brandName.replace(/\s+/g, '_');
+                localStorage.setItem(brandKey + '_history', JSON.stringify(history));
+                alert('Saved to Local History (You are operating offline)');
+                renderHistory();
+            }
+        };
+
+        window.renderHistory = function() {
+            const container = document.getElementById('historyItems');
+            if (!container) return;
+            const search = document.getElementById('historySearch').value.toLowerCase();
+            
+            const filtered = history.filter(item => 
+                item.customer.toLowerCase().includes(search) || 
+                item.date.includes(search) ||
+                item.type.toLowerCase().includes(search)
+            );
+
+            container.innerHTML = filtered.length ? '' : `<div style="padding: 20px; text-align: center; color: #888;">${history.length ? 'No results found.' : 'No history found.'}</div>`;
+            
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                const idParam = typeof item.id === 'string' ? `'${item.id}'` : item.id;
+                
+                div.innerHTML = `
+                    <div style="font-family: Roboto Mono; font-size: 11px;">
+                        <div>${item.date}</div>
+                        <div style="opacity: 0.6; font-size: 10px;">${item.time || '--:--'}</div>
+                    </div>
+                    <div style="font-weight: 600;">${item.customer}</div>
+                    <div><span class="badge badge-${item.type.toLowerCase()}">${item.type}</span></div>
+                    <div style="font-weight: 700; color: var(--brand-primary);">${currentCurrency}${item.total}</div>
+                    <div class="action-btns">
+                        <button class="action-btn btn-view" onclick="loadFromHistory(${idParam})">👁️</button>
+                        <button class="action-btn btn-delete" onclick="deleteHistory(${idParam})">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        };
+
+        window.exportHistoryCSV = function() {
+            if (!history.length) return alert("No history to export!");
+            let csv = "Date,Time,Customer,Type,Total,Address\n";
+            history.forEach(item => {
+                csv += `"${item.date}","${item.time || ''}","${item.customer.replace(/"/g, '""')}","${item.type}","${item.total.replace(/,/g, '')}","${(item.data.address || '').replace(/"/g, '""')}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${config.brandName}_History_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        };
+
+        window.loadFromHistory = function(id) {
+            const item = history.find(h => h.id === id);
+            if (!item) return;
+            document.getElementById('docTypeSelect').value = item.type;
+            updateDocType();
+            document.getElementById('receiptDate').value = item.date;
+            document.getElementById('clientName').value = item.customer;
+            document.getElementById('clientAddress').value = item.data.address;
+            document.getElementById('discount').value = item.data.discount;
+            document.getElementById('vatToggle').checked = item.data.vatEnabled;
+            document.getElementById('amountWords').value = item.data.words;
+            const tbody = document.getElementById('itemsBody');
+            tbody.innerHTML = '';
+            item.data.items.forEach((it, idx) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td style="text-align: center; font-weight: 700;">${idx + 1}</td>
+                    <td><input type="text" class="cell-input" value="${it.desc}"></td>
+                    <td><input type="number" class="cell-input center qty" value="${it.qty}" onchange="calculateRow(this)"></td>
+                    <td><input type="number" class="cell-input number price" value="${it.price}" onchange="calculateRow(this)"></td>
+                    <td><input type="text" class="cell-input number total" value="0.00" readonly></td>
+                `;
+                calculateRow(row.querySelector('.qty'));
+            });
+            closeDashboard();
+            calculateTotals();
+        };
+
+        window.deleteHistory = async function(id) {
+            if (confirm('Delete this entry?')) {
+                if (currentUser && historyCollectionRef) {
+                    try {
+                        await deleteDoc(doc(historyCollectionRef, id));
+                    } catch(e) {
+                        alert("Error deleting: " + e.message);
+                    }
+                } else {
+                    history = history.filter(h => h.id !== id);
+                    const brandKey = config.brandName.replace(/\s+/g, '_');
+                    localStorage.setItem(brandKey + '_history', JSON.stringify(history));
+                    renderHistory();
+                }
+            }
+        };
+
+        window.clearAllHistory = async function() {
+            if (confirm('Are you sure you want to clear ALL history? This cannot be undone!')) {
+                if (currentUser && historyCollectionRef) {
+                    alert("Batch delete not implemented. Please delete items individually.");
+                } else {
+                    history = [];
+                    const brandKey = config.brandName.replace(/\s+/g, '_');
+                    localStorage.removeItem(brandKey + '_history');
+                    renderHistory();
+                }
+            }
+        };
+
+        window.openDashboard = function() { document.getElementById('dashboardOverlay').style.display = 'flex'; renderHistory(); };
+        window.closeDashboard = function() { document.getElementById('dashboardOverlay').style.display = 'none'; };
+
+        window.handleSignatureUpload = async function(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    savedSignature = e.target.result;
+                    if (currentUser) {
+                        const userSettingsRef = doc(db, "user_settings", currentUser.uid);
+                        try {
+                            await updateDoc(userSettingsRef, { signature: savedSignature }, { merge: true });
+                        } catch (error) {
+                            if (error.code === 'not-found') await setDoc(userSettingsRef, { signature: savedSignature });
+                        }
+                    } else {
+                        const brandKey = config.brandName.replace(/\s+/g, '_');
+                        localStorage.setItem(brandKey + '_signature', savedSignature);
+                    }
+                    displaySignature();
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.displaySignature = function() {
+            const img = document.getElementById('receiptSignature');
+            const preview = document.getElementById('sigPreviewMini');
+            if (savedSignature) {
+                if (img) { img.src = savedSignature; img.style.display = 'block'; }
+                if (preview) preview.innerHTML = `<img src="${savedSignature}" style="max-height: 100%; max-width: 100%;">`;
+            } else {
+                if (img) img.style.display = 'none';
+                if (preview) preview.innerHTML = '<span style="color: #888; font-size: 11px;">No signature</span>';
+            }
+        };
+
+        window.clearSavedSignature = async function() {
+            if (confirm('Clear saved signature?')) {
+                savedSignature = null;
+                if (currentUser) {
+                    const userSettingsRef = doc(db, "user_settings", currentUser.uid);
+                    await updateDoc(userSettingsRef, { signature: null });
+                } else {
+                    const brandKey = config.brandName.replace(/\s+/g, '_');
+                    localStorage.removeItem(brandKey + '_signature');
+                }
+                displaySignature();
+            }
+        };
+
+        window.clearReceipt = function() {
+            if (confirm('Reset engine?')) {
+                document.getElementById('clientName').value = '';
+                document.getElementById('clientAddress').value = '';
+                document.getElementById('itemsBody').innerHTML = '';
+                document.getElementById('discount').value = '0';
+                document.getElementById('amountWords').value = '';
+                calculateTotals();
+                addItem();
+            }
+        };
+
+        window.savePDF = function() {
+            const element = document.getElementById('receipt');
+            const opt = { margin: 0, filename: `${config.brandName}_Document.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 3 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            html2pdf().set(opt).from(element).save();
+        };
+
+        window.saveImage = function() {
+            const element = document.getElementById('receipt');
+            domtoimage.toJpeg(element, { quality: 0.95 }).then(dataUrl => {
+                const link = document.createElement('a'); link.download = `${config.brandName}_Document.jpg`; link.href = dataUrl; link.click();
+            });
+        };
+
+        window.shareDocument = async function() {
+            if (navigator.share) {
+                const element = document.getElementById('receipt');
+                const blob = await html2pdf().from(element).output('blob');
+                const file = new File([blob], `${config.brandName}_Document.pdf`, { type: 'application/pdf' });
+                navigator.share({ files: [file], title: 'Shared Document', text: `Here is your ${config.docType} from ${config.brandName}` });
+            } else { alert('Sharing not supported on this browser.'); }
+        };
+
+        window.onload = function() {
+            applyBranding();
+            const dateInput = document.getElementById('receiptDate');
+            if (dateInput) dateInput.valueAsDate = new Date();
+            refreshStamp();
+            addItem();
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js');
+        };
+    </script>
+</body>
+</html>
